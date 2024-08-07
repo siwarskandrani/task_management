@@ -41,4 +41,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class, 'user_teams', 'ID_user', 'ID_team')
+                    ->withPivot('role')
+                    ->withTimestamps();
+    }
+
 }

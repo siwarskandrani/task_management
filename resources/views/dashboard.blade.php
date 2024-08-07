@@ -1,17 +1,51 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
+<!-- resources/views/dashboard.blade.php -->
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    {{ __("You're logged in!") }}
-                </div>
+@section('dashboard')
+<div class="py-12">
+    <div class="container">
+        <h1 class="mb-3">You want to create:</h1>
+        <div class="row g-4">
+            <!-- First Card -->
+            <div class="col-md-4 col-sm-6">
+                <a href="{{ route('teams.create') }}" class="text-decoration-none">
+                    <div class="card">
+                        <div class="position-relative">
+                            <img src="{{ asset('images/20240801080737.jpg') }}" class="card-img-top" alt="Team Image" style="object-fit: cover; height: 200px;">
+                            <div class="position-absolute bottom-0 start-0 w-100 bg-dark text-white text-center p-2">
+                                Team
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <!-- Second Card -->
+            <div class="col-md-4 col-sm-6">
+                <a href="" class="text-decoration-none">
+                    <div class="card">
+                        <div class="position-relative">
+                            <img src="{{ asset('images/20240801080737.jpg') }}" class="card-img-top" alt="Task Image" style="object-fit: cover; height: 200px;">
+                            <div class="position-absolute bottom-0 start-0 w-100 bg-dark text-white text-center p-2">
+                                Task
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <!-- Third Card -->
+            <div class="col-md-4 col-sm-6">
+                <a href="" class="text-decoration-none">
+                    <div class="card">
+                        <div class="position-relative">
+                            <img src="{{ asset('images/20240801080737.jpg') }}" class="card-img-top" alt="Project Image" style="object-fit: cover; height: 200px;">
+                            <div class="position-absolute bottom-0 start-0 w-100 bg-dark text-white text-center p-2">
+                                Project
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
-</x-app-layout>
+</div>
+@endsection
