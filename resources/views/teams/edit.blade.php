@@ -1,7 +1,7 @@
-<!-- resources/views/teams/create.blade.php -->
+<!-- resources/views/teams/edit.blade.php -->
 @extends('layouts.app')
 
-@section('create_team')
+@section('edit_team')
 <div class="container p-5">
     <br>
     <div class="row">
@@ -10,7 +10,7 @@
         </div>
     </div>
     <br>
-    
+
     @if ($errors->any())
     <div class="alert alert-danger" role="alert">
         <ul>
@@ -20,17 +20,19 @@
         </ul>
     </div>
     @endif
-    
+
     <div class="container p-5">
-        <form action="{{ route('teams.store') }}" method="post" enctype="multipart/form-data">
+        <form action="{{ route('teams.update', $team->id) }}" method="post">
             @csrf
+            @method('PUT')
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
                 <input
                     type="text"
                     class="form-control"
-                    name="name" {{-- Correspond au 'name' dans la validation du contrôleur --}}
+                    name="name"
                     id="name"
+                    value="{{ old('name', $team->name) }}"
                 />
             </div>
             <div class="mb-3">
@@ -40,21 +42,22 @@
                     id="description"
                     class="form-control"
                     rows="3"
-                ></textarea>
+                >{{ old('description', $team->description) }}</textarea>
             </div>
+
             <div class="mb-3">
-                <label for="emails_member" class="form-label">Invite Members (emails separated by commas)</label>
+                <label for="emails_member" class="form-label">Update Members (emails separated by commas)</label>
                 <input
                     type="text"
                     class="form-control"
                     name="emails_member"
                     id="emails_member"
+                    value="{{ old('emails_member', implode(',', $members->pluck('email')->toArray())) }}"
                 />
                 <small class="form-text text-muted">Enter multiple emails separated by commas.</small>
             </div>
-        
-        
-            <button type="submit" class="btn btn-success">Submit</button>
+
+            <button type="submit" class="btn btn-success">Update</button>
         </form>
     </div>
 </div>

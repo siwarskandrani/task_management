@@ -14,7 +14,7 @@ class Team extends Model
         'description', // example column
     ];
     public function users() {
-        return $this->belongsToMany(User::class, 'user_team', 'ID_team', 'ID_user')
+        return $this->belongsToMany(User::class, 'user__teams', 'ID_team', 'ID_user')
                     ->withPivot('role')
                     ->withTimestamps();
     }

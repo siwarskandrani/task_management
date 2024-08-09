@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('role');
             $table->timestamps();
             
-            $table->foreign('ID_user')->references('id')->on('users')->onDelete('cascade');//on delete cascade cvd si Si un utilisateur (ligne dans la table users) est supprimé, tous les enregistrements dans user_teams qui se réfèrent à cet utilisateur seront aussi supprimés.
+            $table->foreign('ID_user')->references('id')->on('users')->onDelete('cascade');//on delete cascade cvd si  un utilisateur (ligne dans la table users) est supprimé, tous les enregistrements dans user_teams qui se réfèrent à cet utilisateur seront aussi supprimés.
             $table->foreign('ID_team')->references('id')->on('teams')->onDelete('cascade');
         });
     }

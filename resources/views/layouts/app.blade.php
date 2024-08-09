@@ -30,6 +30,8 @@
                     @yield('dashboard')
                     @yield('profile')
                     @yield('create_team')
+                    @yield('index_team')
+                    @yield('edit_team')
                 </div>
             </div>
         </div>
