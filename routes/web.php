@@ -7,6 +7,7 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\TagController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,8 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
     Route::resource('tasks', TaskController::class); //un seul route fait l'appel a tous les fonction du contoleur product
     Route::get('/teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
+    Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
+    Route::get('/tasks/calendar', [TaskController::class, 'calendar'])->name('tasks.calendar');
 
 });
 

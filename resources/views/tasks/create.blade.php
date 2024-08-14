@@ -88,35 +88,43 @@
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
+        {{-- tags --}}
+        <div class="form-group mb-3">
+            <label for="tags">Tags</label>
+            <select id="tags" name="tags[]" class="form-control" multiple>
+                @foreach($tags as $tag)
+                    <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        
+        <!-- Sélection du type -->
+        <div class="form-group mb-3">
+            <label for="type">Type</label>
+            <select name="type" id="type" class="form-select" required>
+                <option value="1" {{ old('type') == '1' ? 'selected' : '' }}>Main task</option>
+                <option value="2" {{ old('type') == '2' ? 'selected' : '' }}>Sub task</option>
+            </select>
+            @error('type')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+        </div>
 
-      <!-- Sélection du type -->
-<div class="form-group mb-3">
-    <label for="type">Type</label>
-    <select name="type" id="type" class="form-select" required>
-        <option value="1" {{ old('type') == '1' ? 'selected' : '' }}>Main task</option>
-        <option value="2" {{ old('type') == '2' ? 'selected' : '' }}>Sub task</option>
-    </select>
-    @error('type')
-        <div class="text-danger">{{ $message }}</div>
-    @enderror
-</div>
-
-<!-- Parent Task -->
-<div class="form-group mb-3">
-    <label for="parent_task">Parent Task</label>
-    <select name="parent_task" id="parent_task" class="form-select">
-        <option value="">None</option>
-        @foreach($parent_tasks as $task)
-            <option value="{{ $task->id }}" {{ old('parent_task') == $task->id ? 'selected' : '' }}>
-                {{ $task->title }}
-            </option>
-        @endforeach
-    </select>
-    @error('parent_task')
-        <div class="text-danger">{{ $message }}</div>
-    @enderror
-</div>
-
+        <!-<!-- Parent Task -->
+        <div class="form-group mb-3">
+            <label for="parent_task">Parent Task</label>
+            <select name="parent_task" id="parent_task" class="form-select">
+                <option value="">None</option>
+                @foreach($parent_tasks as $task)
+                    <option value="{{ $task->id }}" {{ old('parent_task') == $task->id ? 'selected' : '' }}>
+                        {{ $task->title }}
+                    </option>
+                @endforeach
+            </select>
+            @error('parent_task')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+        </div>
         
 
         <!-- Dates -->
@@ -152,14 +160,12 @@
 
 @section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+ document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
     const teamSelect = document.getElementById('team_id');
     const assigneeSelect = document.getElementById('assignee_id');
     const mediaInput = document.getElementById('media');
     const mediaContainer = document.getElementById('media-preview');
-    const typeSelect = document.getElementById('type');
-    const parentTaskSelect = document.getElementById('parent_task');
 
     // Fonction pour afficher les aperçus des médias
     function displayMediaPreviews(media) {
@@ -172,17 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
             mediaElement.style.margin = '5px';
             mediaContainer.appendChild(mediaElement);
         });
-    }
-
-    // Fonction pour gérer la désactivation du champ parent_task
-    function toggleParentTask() {
-        const typeValue = typeSelect.value;
-        if (typeValue == '1') { // Main task
-            parentTaskSelect.disabled = true;
-            parentTaskSelect.value = ''; // Optionnel: Réinitialiser la valeur
-        } else { // Sub task
-            parentTaskSelect.disabled = false;
-        }
     }
 
     // Gestion du formulaire
@@ -207,7 +202,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => console.error('Error:', error));
     });
 
-    // Mise à jour des membres de l'équipe en fonction de la sélection de l'équipe
     teamSelect.addEventListener('change', function() {
         const teamId = this.value;
         
@@ -229,16 +223,11 @@ document.addEventListener('DOMContentLoaded', function() {
             assigneeSelect.innerHTML = '<option value="">Select an assignee</option>';
         }
     });
-
-    // Appel initial pour définir l'état du champ parent_task
-    toggleParentTask();
-
-    // Ajouter un écouteur d'événements pour le changement du type de tâche
-    typeSelect.addEventListener('change', toggleParentTask);
 });
-</script>
-@endsection
 
+    </script>
+    
+@endsection
 
 
 @endsection
