@@ -32,11 +32,12 @@ class TaskController extends Controller
             $query->where('user__teams.ID_user', $userId);
         })->get();
     
-        // Récupérer toutes les tâches 
-        $tasks = Task::all();
+        // Récupérer toutes les tâches qui n'ont pas de parent_task
+        $parent_tasks = Task::whereNull('parent_task')->get();
         
-        return view('tasks.create', compact('projects', 'teams', 'tasks'));
+        return view('tasks.create', compact('projects', 'teams', 'parent_tasks'));
     }
+    
     
     public function store(Request $request)
 {
