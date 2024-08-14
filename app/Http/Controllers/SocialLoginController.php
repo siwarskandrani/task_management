@@ -39,4 +39,3 @@ class SocialLoginController extends Controller
 
         return redirect()->route('dashboard'); // Redirige vers la page d'accueil ou une autre page après l'authentification
     }
-}

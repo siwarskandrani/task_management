@@ -1,4 +1,3 @@
-<!-- resources/views/teams/create.blade.php -->
 @extends('layouts.app')
 
 @section('create_team')
@@ -49,6 +48,8 @@
                     class="form-control"
                     name="emails_member"
                     id="emails_member"
+                    placeholder="example@example.com, another@example.com"
+
                 />
                 <small class="form-text text-muted">Enter multiple emails separated by commas.</small>
             </div>

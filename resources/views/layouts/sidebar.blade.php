@@ -10,13 +10,13 @@
                 </a>
             </li>
             <li>
-                <a href="#submenu1" class="nav-link align-middle px-0">
+                <a href="{{route('tasks.index')}}" class="nav-link align-middle px-0">
                     <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 d-none d-sm-inline">My tasks</span>
                 </a>
               
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link align-middle px-0">
+                <a href="{{route('projects.index')}}" class="nav-link align-middle px-0">
                     <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">My projects</span>
                 </a>
             </li>

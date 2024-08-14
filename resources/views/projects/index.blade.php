@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('index_team')
+@section('index_project')
 <div class="container p-5">
     <br>
     <div class="row">
         <div class="col align-self-start">
-            <a class="btn btn-primary" href="{{ route('teams.create') }}">Crete team </a>
+            <a class="btn btn-primary" href="{{ route('projects.create') }}">Create project </a>
         </div>
     </div>
     <br>
@@ -28,35 +28,26 @@
             <tr>
                 <th>Name</th>
                 <th>Description</th>
-                <th>My role</th>
-                <th>Members</th>
+                
                 <th width='300px'>Actions</th>
             </tr>
         </thead>
         <tbody class="table-group-divider">
-            @foreach ($teams as $team) 
+            @foreach ($projects as $project) 
                 {{-- La variable $products est définie dans le contrôleur (dans la méthode index).
                      Elle est passée à la vue products.index en utilisant compact('products'). --}}
                 <tr class="table-primary">
-                    <td>{{ $team->name }}</td>
-                    <td>{{ $team->description }}</td>
-                    <td>{{ $team->pivot->role }}</td>
+                    <td>{{ $project->name }}</td>
+                    <td>{{ $project->description }}</td>                  
                     <td>
-                        <ul>
-                            @foreach ($team->users as $member)
-                                <li>{{ $member->name }} ({{ $member->pivot->role }})</li>
-                            @endforeach
-                        </ul>
-                    </td>
-                    <td>
-                        <form action="{{route('teams.destroy', $team->id) }}"method="post" style="display: inline-block;">
+                        <form action="{{route('projects.destroy', $project->id) }}"method="post" style="display: inline-block;">
                             @csrf
                             @method('DELETE') 
                             {{-- Les formulaires HTML ne supportent que les méthodes GET et POST.
                                  Cependant, les conventions RESTful utilisées par Laravel impliquent l'utilisation de différentes méthodes HTTP (comme PUT, PATCH, et DELETE) pour différentes opérations CRUD. --}}
                             <button type="submit" class="btn btn-danger">Delete</button>
                         </form>
-                        <a class="btn btn-primary" href="{{ route('teams.edit', $team->id) }}">Edit</a>
+                      <a class="btn btn-primary" href="{{ route('projects.edit', $project->id) }}">Edit</a> 
                        
                     </td>
                 </tr>

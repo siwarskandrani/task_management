@@ -4,6 +4,9 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SocialLoginController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\MediaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +32,10 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::resource('teams', TeamController::class); //un seul route fait l'appel a tous les fonction du contoleur product
+    Route::resource('projects', ProjectController::class); //un seul route fait l'appel a tous les fonction du contoleur product
+    Route::resource('tasks', TaskController::class); //un seul route fait l'appel a tous les fonction du contoleur product
+    Route::get('/teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');
+
 });
 
 // Routes pour l'authentification sociale

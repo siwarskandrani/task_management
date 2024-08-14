@@ -50,19 +50,23 @@ class TeamController extends Controller
       // On découpe la chaîne de caractères en un tableau d'emails
          $emails = array_map('trim', explode(',', $request->input('emails_member', '')));
     
-    foreach ($emails as $email) {
-        if (!empty($email)) {
-            $user = User::where('email', $email)->first();
-            if ($user) {
-                // Ajout du membre à l'équipe avec le rôle 'member'
-                $team->users()->attach($user->id, ['role' => 'member']);
-                
-                // Envoi de l'e-mail d'invitation
-                Mail::to($user->email)->send(new TeamInvitation($team));
+         foreach ($emails as $email) {
+            if (!empty($email)) {
+                $user = User::where('email', $email)->first();
+                if ($user) {
+                    // Add existing user to the team
+                    $team->users()->attach($user->id, ['role' => 'member']);
+                    // Send invitation email
+                    Mail::to($user->email)->send(new TeamInvitation($team));
+                } else {
+                    // Generate registration link
+                    $invitationLink = route('register', ['email' => $email, 'team_id' => $team->id]);
+                    // Send invitation email with registration link
+                    Mail::to($email)->send(new TeamInvitation($team, $invitationLink));
+                }
             }
         }
-    }
-
+        
     // Redirection avec message de succès
     return redirect()->route('dashboard')->with('success', 'New team added successfully');
 }
@@ -168,6 +172,15 @@ class TeamController extends Controller
     }
     
 
-
+    public function members($teamId)
+    {
+        $team = Team::findOrFail($teamId);
+        $members = $team->users; //la relation entre teams et users elle s'appelle users(c la ftc )
+    
+        return response()->json(['members' => $members]);
+    }
+    
+    
+    
 
 }

@@ -12,16 +12,18 @@ class TeamInvitation extends Mailable
     use Queueable, SerializesModels;
 
     public $team;
+    public $invitationLink;
 
     /**
      * Create a new message instance.
      *
      * @param Team $team
-     * @return void
+     * @param string|null $invitationLink
      */
-    public function __construct(Team $team)
+    public function __construct(Team $team, $invitationLink = null)
     {
         $this->team = $team;
+        $this->invitationLink = $invitationLink;
     }
 
     /**
@@ -31,9 +33,19 @@ class TeamInvitation extends Mailable
      */
     public function build()
     {
-        return $this->view('emails.team_invitation')
-                    ->with([
-                        'teamName' => $this->team->name,
-                    ]);
+        if ($this->invitationLink) {
+            return $this->subject('Invitation to Join Team ' . $this->team->name)
+                        ->view('emails.team_invitation_new_user')
+                        ->with([
+                            'teamName' => $this->team->name,
+                            'invitationLink' => $this->invitationLink,
+                        ]);
+        } else {
+            return $this->subject('Invitation to Join Team ' . $this->team->name)
+                        ->view('emails.team_invitation_existing_user')
+                        ->with([
+                            'teamName' => $this->team->name,
+                        ]);
+        }
     }
 }
