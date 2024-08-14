@@ -34,18 +34,18 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::resource('teams', TeamController::class); //un seul route fait l'appel a tous les fonction du contoleur product
     Route::resource('projects', ProjectController::class); //un seul route fait l'appel a tous les fonction du contoleur product
+    Route::get('/tasks/calendar', [TaskController::class, 'calendar'])->name('tasks.calendar');
     Route::resource('tasks', TaskController::class); //un seul route fait l'appel a tous les fonction du contoleur product
     Route::get('/teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
     Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
-    Route::get('/tasks/calendar', [TaskController::class, 'calendar'])->name('tasks.calendar');
 
 });
 
 // Routes pour l'authentification sociale
 Route::get('auth/{driver}/redirect', [SocialLoginController::class, 'redirectToProvider'])->where('driver', 'google|facebook');
 Route::get('auth/{driver}/login', [SocialLoginController::class, 'handleProviderCallback'])->where('driver', 'google|facebook');
-Route::get('/sendEmail', [EmailVeriController::class, 'send']);
+//Route::get('/sendEmail', [EmailVeriController::class, 'send']);
 
 // routes/web.php
 

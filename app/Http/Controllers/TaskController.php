@@ -159,18 +159,28 @@ public function show($id)
     public function calendar()
     {
         $tasks = Task::all()->map(function($task) {
+            // Define a list of colors
+            $colors = ['#ff5733', '#33ff57', '#3357ff', '#ff33a6', '#f1c40f'];
+    
+            // Randomly assign a color
+            $color = $colors[array_rand($colors)];
+    
             return [
                 'title' => $task->title,
                 'start' => $task->start_date ? \Carbon\Carbon::parse($task->start_date)->format('Y-m-d') : null,
                 'end' => $task->end_date ? \Carbon\Carbon::parse($task->end_date)->format('Y-m-d') : null,
-                'description' => $task->description
+                'description' => $task->description,
+                'backgroundColor' => $color, // Background color for the event
+                'borderColor' => $color      // Border color for the event (optional)
             ];
         });
     
-        return view('tasks.calendar', compact('tasks'));
+        return view('tasks.calendar', ['tasks' => $tasks]);
+    }
+    
     }
     
     
 
-}
+
 

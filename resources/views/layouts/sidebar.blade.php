@@ -21,8 +21,8 @@
                 </a>
             </li>
             <li>
-                <a href="#submenu1" class="nav-link align-middle px-0">
-                    <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 d-none d-sm-inline">My tasks</span>
+                <a href="{{route('tasks.calendar')}}" class="nav-link align-middle px-0">
+                    <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 d-none d-sm-inline">My Calendar</span>
                 </a>
               
             </li>
