@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Media;
+use App\Models\Media; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,7 +16,7 @@ class MediaController extends Controller
 
         if ($request->hasFile('media')) {
             $file = $request->file('media');
-            $path = $file->store('media', 'public');
+            $path = $file->store('media', 'public'); // on stolke les files dans le dossier storage/app/media
 
             $media = Media::create(['path' => $path]);
 

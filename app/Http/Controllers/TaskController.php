@@ -7,6 +7,7 @@ use App\Models\Team;
 use Illuminate\Http\Request;
 use App\Models\Project; 
 use App\Models\User;
+use App\Models\Media;
 
 class TaskController extends Controller
 {
@@ -42,26 +43,26 @@ class TaskController extends Controller
     $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
-        'team_id' => 'required|exists:teams,id',
+        'team_id' => 'required|exists:teams,id',//exists:teams,id: Il doit correspondre à un ID valide dans la table teams
         'owner_id' => 'required|exists:users,id',
         'project_id' => 'nullable|exists:projects,id',
         'status' => 'required|string|in:not_started,in_progress,completed',
         'type' => 'required|integer|in:1,2',
         'parent_task_id' => 'nullable|exists:tasks,id',
         'start_date' => 'nullable|date',
-        'end_date' => 'nullable|date|after_or_equal:start_date',
-        'media.*' => 'mimes:jpg,jpeg,png,pdf|max:2048', // Validation des fichiers média
+        'end_date' => 'nullable|date|after_or_equal:start_date', //after_or_equal règle par laravel il sufiit de l'ecrire
+        'media.*' => 'mimes:jpg,jpeg,png,pdf|max:2048', //* car on peut telecharger plusieur fichiers donc chaque fichier doit respecter ces contraintes
     ]);
 
+    //Création de la Tâche
     $ownerId = $request->input('owner_id');
-
     $input = $request->except('media');
     $input['owner'] = $ownerId;
     $task = Task::create($input);
-
+    //Gestion des Fichiers Média
     if ($request->hasFile('media')) {
         foreach ($request->file('media') as $file) {
-            $path = $file->store('task_media');
+            $path = $file->store('task_media'); //on stock l file dans le dossier task_media
             $media = Media::create(['path' => $path]);
             $task->media()->attach($media->id);
         }

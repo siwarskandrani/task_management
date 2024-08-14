@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
     Route::resource('projects', ProjectController::class); //un seul route fait l'appel a tous les fonction du contoleur product
     Route::resource('tasks', TaskController::class); //un seul route fait l'appel a tous les fonction du contoleur product
     Route::get('/teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');
+    Route::post('/media', [MediaController::class, 'store'])->name('media.store');
 
 });
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Model
 {
     use HasFactory;
-    protected $fillable = ['title', 'description', 'status', 'start_date', 'end_date', 'project_id', 'owner', 'type', 'parent_task'];
+    protected $fillable = ['title', 'description', 'status', 'start_date', 'end_date', 'project_id', 'owner', 'type', 'parent_task'];//les colonnes qui peuvent être remplies via un formulaire
     
     public function project()
     {
@@ -32,7 +32,7 @@ class Task extends Model
     
     public function media()
     {
-        return $this->belongsToMany(Media::class, 'task_media');
+        return $this->belongsToMany(Media::class, 'task_media');//Cette méthode définit une relation Many-to-Many avec le modèle Task via la table pivot task_media
     }
     
 }
