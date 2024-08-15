@@ -36,6 +36,8 @@
                         <td>{{ $task->end_date }}</td>
                         <td>
                             <a href="{{ route('tasks.edit', $task->id) }}" class="btn btn-primary btn-sm">Edit</a>
+                            <a href="{{ route('tasks.show', $task->id) }}" class="btn btn-info btn-sm">show</a>
+
                             <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" style="display:inline-block;">
                                 @csrf
                                 @method('DELETE')

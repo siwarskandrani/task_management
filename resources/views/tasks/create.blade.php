@@ -37,29 +37,38 @@
             @enderror
         </div>
 
-        <!-- team -->
-        <div class="form-group mb-3">
-            <label for="team_id">Team</label>
-            <select name="team_id" id="team_id" class="form-select">
-                @foreach($teams as $team)
-                    <option value="{{ $team->id }}">{{ $team->name }}</option>
-                @endforeach
-            </select>
-            @error('team_id')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
+   <!-- team -->
+<div class="form-group mb-3">
+    <label for="team_id">Team</label>
+    <select name="team_id" id="team_id" class="form-select">
+        <option value="">None</option> <!-- Option None pour aucune équipe -->
+        @foreach($teams as $team)
+            <option value="{{ $team->id }}">{{ $team->name }}</option>
+        @endforeach
+    </select>
+    @error('team_id')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
 
-        <!-- owner -->
-        <div class="form-group mb-3">
-            <label for="owner_id">Assignee</label>
-            <select name="owner_id" id="assignee_id" class="form-select">
-                <option value="">Select an assignee</option>
-            </select>
-            @error('owner_id')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
+<!-- owner -->
+<div class="form-group mb-3">
+    <label for="owner_id">Assignee</label>
+    <select name="owner_id" id="assignee_id" class="form-select" disabled> <!-- Disabled par défaut -->
+        <option value="{{ auth()->id() }}">Self Assignee</option> <!-- Option Self Assignee par défaut -->
+        @foreach($teams as $team)
+            @foreach($team->users as $user) <!-- Lister les utilisateurs de chaque équipe -->
+                <option value="{{ $user->id }}">{{ $user->name }}</option>
+            @endforeach
+        @endforeach
+    </select>
+    @error('owner_id')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
+
+
+
 
     <!--projet -->
 <div class="form-group mb-3">
@@ -143,15 +152,15 @@
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
-    <!-- médias -->
-        <div class="form-group mb-3">
-            <label for="media">Add Media</label>
-            <input type="file" name="media[]" id="media" class="form-control" multiple>
-            @error('media.*')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
-        <div id="media-preview" class="d-flex flex-wrap"></div>
+     <!-- Médias -->
+     <div class="form-group mb-3">
+        <label for="media">Add Media</label>
+        <input type="file" name="media[]" id="media" class="form-control" multiple>
+        @error('media.*')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
+    </div>
+    <div id="media-preview" class="d-flex flex-wrap"></div>
 
 
         <button type="submit" class="btn btn-primary">Submit</button>
@@ -202,11 +211,14 @@
         .catch(error => console.error('Error:', error));
     });
 
-    teamSelect.addEventListener('change', function() {
-        const teamId = this.value;
-        
-        if (teamId) {
-            fetch(`/teams/${teamId}/members`)
+    // Fonction pour activer ou désactiver le champ "Assignee"
+    function toggleAssigneeField() {
+        if (teamSelect.value === "") { // Si "None" est sélectionné
+            assigneeSelect.disabled = true;
+            assigneeSelect.innerHTML = '<option value="{{ auth()->id() }}">Self Assignee</option>'; // Remet "Self Assignee"
+        } else {
+            assigneeSelect.disabled = false;
+            fetch(`/teams/${teamSelect.value}/members`)
                 .then(response => response.json())
                 .then(data => {
                     assigneeSelect.innerHTML = '<option value="">Select an assignee</option>';
@@ -219,15 +231,19 @@
                     });
                 })
                 .catch(error => console.error('Error fetching team members:', error));
-        } else {
-            assigneeSelect.innerHTML = '<option value="">Select an assignee</option>';
         }
-    });
+    }
+
+    // Appel initial pour définir l'état correct au chargement
+    toggleAssigneeField();
+
+    // Ajoute un écouteur pour le changement de la sélection de l'équipe
+    teamSelect.addEventListener('change', toggleAssigneeField);
 });
 
-    </script>
-    
+</script>
 @endsection
+
 
 
 @endsection

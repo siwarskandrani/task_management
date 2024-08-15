@@ -17,7 +17,7 @@ class Task extends Model
 
     public function owner()
     {
-        return $this->belongsTo(User::class, 'owner'); 
+        return $this->belongsTo(User::class /*',owner'*/); 
     }
 
     public function tags()

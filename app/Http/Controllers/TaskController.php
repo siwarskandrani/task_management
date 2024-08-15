@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\Task;
 use App\Models\Team;
@@ -15,8 +16,8 @@ class TaskController extends Controller
     public function index()
     {
         // Pour que seul le propriétaire des tâches puisse voir la liste de ses tâches
-        $userId = auth()->id();
-        $tasks = Task::where('owner', $userId)->with('team')->get();
+        $userId = auth()->id(); //userId c le user qui son session est ouverte
+        $tasks = Task::where('owner', $userId)->with('team')->get(); //en php: select * from table tasks where owner == userId n faisant un appel a la table teams appeleé par  la relation team (presente dans le model Task) car dans la formulaire ona besoin de team name : {{ $task->team->name }} 
         
         // Passer les tâches à la vue
         return view('tasks.index', compact('tasks'));
@@ -26,13 +27,14 @@ class TaskController extends Controller
         $userId = auth()->id();
         
         // Récupérer les projets appartenant à l'utilisateur connecté
-        $projects = Project::where('owner', $userId)->get();
+        $projects = Project::where('owner', $userId)->get(); 
         
-        // Récupérer les équipes auxquelles l'utilisateur connecté appartient
-        $teams = Team::whereHas('users', function($query) use ($userId) {
-            $query->where('user__teams.ID_user', $userId);
+        // Récupérer les équipes où l'utilisateur est admin
+        $teams = Team::whereHas('users', function($query) use ($userId) { //on utilise whereHas quand on a l where sur une relation pas un attrtibut ==>users c'est une relation dans le model Team
+            $query->where('user__teams.ID_user', $userId)
+                  ->where('user__teams.role', 'admin'); 
         })->get();
-    
+        
         // Récupérer toutes les tâches qui n'ont pas de parent_task
         $parent_tasks = Task::whereNull('parent_task')->get();
         
@@ -41,111 +43,169 @@ class TaskController extends Controller
     }
     
     
+    
     public function store(Request $request)
-{
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'team_id' => 'nullable|exists:teams,id', // Nullable pour permettre de créer une tâche sans équipe
+            'owner_id' => 'nullable|exists:users,id|required_with:team_id', // Requis si team_id est présent
+            'project_id' => 'nullable|exists:projects,id',
+            'status' => 'required|string|in:not_started,in_progress,completed',
+            'type' => 'required|integer|in:1,2',
+            'parent_task_id' => 'nullable|exists:tasks,id',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,bmp,doc,docx,ppt,pptx,xls,xlsx,pdf',
+            'tags.*' => 'exists:tags,id',
+        ]);
+    
+        // Création de la tâche
+        $task = Task::create([
+            'title' => $request->input('title'),
+            'description' => $request->input('description'),
+            'team_id' => $request->input('team_id'),
+            'owner' => $request->input('owner_id') ?: auth()->id(), // Assigner à soi-même si aucun owner_id n'est fourni
+            'project_id' => $request->input('project_id'),
+            'status' => $request->input('status'),
+            'type' => $request->input('type'),
+            'parent_task_id' => $request->input('parent_task_id'),
+            'start_date' => $request->input('start_date'),
+            'end_date' => $request->input('end_date'),
+        ]);
+        
+        // Gestion des fichiers média
+        if ($request->hasFile('media')) {
+            foreach ($request->file('media') as $file) {
+                $extension = $file->getClientOriginalExtension();
+    
+                if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
+                    $path = $file->store('task_images');
+                } else {
+                    $path = $file->store('task_documents');
+                }
+    
+                $media = Media::create(['path' => $path]);
+                $task->media()->attach($media->id);
+            }
+        }
+        
+        
+        // Attacher les tags
+        if ($request->has('tags')) {
+            $task->tags()->attach($request->input('tags'));
+        }
+    
+        return redirect()->route('tasks.index')->with('success', 'New task added successfully');
+    }
+    
+
+    
+
+    public function edit(Task $task)
+    {
+        $userId = auth()->id();
+        
+        // Récupérer les projets appartenant à l'utilisateur connecté
+        $projects = Project::where('owner', $userId)->get(); 
+        
+        // Récupérer les équipes où l'utilisateur est admin
+        $teams = Team::whereHas('users', function($query) use ($userId) {
+            $query->where('user__teams.ID_user', $userId)
+                  ->where('user__teams.role', 'admin'); 
+        })->get();
+        
+        // Récupérer toutes les tâches qui n'ont pas de parent_task
+        $parent_tasks = Task::whereNull('parent_task')->get();
+        
+        $tags = Tag::all();
+        
+        // Assurez-vous que la tâche inclut les relations nécessaires (team et owner)
+      //  $task->load('team', 'owner');
+      //  dd($task);
+        return view('tasks.edit', compact('projects', 'teams', 'parent_tasks', 'tags', 'task'));
+    }
+    
+    
+
+    
+    
+
+
+public function update(Request $request, $id)
+{      
+     $task = Task::findOrFail($id);
+
     $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
-        'team_id' => 'required|exists:teams,id',//exists:teams,id: Il doit correspondre à un ID valide dans la table teams
-        'owner_id' => 'required|exists:users,id',
+        'team_id' => 'nullable|exists:teams,id', // Nullable pour permettre de créer une tâche sans équipe
+        'owner_id' => 'nullable|exists:users,id|required_with:team_id', // Requis si team_id est présent
         'project_id' => 'nullable|exists:projects,id',
         'status' => 'required|string|in:not_started,in_progress,completed',
         'type' => 'required|integer|in:1,2',
         'parent_task_id' => 'nullable|exists:tasks,id',
         'start_date' => 'nullable|date',
-        'end_date' => 'nullable|date|after_or_equal:start_date', //after_or_equal règle par laravel il sufiit de l'ecrire
-        'media.*' => 'mimes:jpg,jpeg,png,pdf|max:2048', //* car on peut telecharger plusieur fichiers donc chaque fichier doit respecter ces contraintes
-        'tags.*' => 'exists:tags,id', // Validation pour les tags
-
-    ]);
-
-    //Création de la Tâche
-    $ownerId = $request->input('owner_id');
-    $input = $request->except('media');
-    $input['owner'] = $ownerId;
-    $task = Task::create($input);
-    
-    //Gestion des Fichiers Média
-    if ($request->hasFile('media')) {
-        foreach ($request->file('media') as $file) {
-            $path = $file->store('task_media'); //on stock l file dans le dossier task_media
-            $media = Media::create(['path' => $path]);
-            $task->media()->attach($media->id);
-        }
-    }
-    // Attacher les tags
-    if ($request->has('tags')) {
-        $task->tags()->attach($request->input('tags'));
-    }
-    return redirect()->route('tasks.index')->with('success', 'New task added successfully');
-}
-
-    
-public function edit($id)
-{
-    $task = Task::findOrFail($id);
-
-    // Récupérer toutes les équipes
-    $teams = Team::all();
-
-    // Vérifier si la tâche a une équipe assignée
-    $members = $task->team ? $task->team->users : collect(); // Membres de l'équipe ou collection vide si aucune équipe
-
-    // Récupérer tous les tags
-    $tags = Tag::all();
-
-    return view('tasks.edit', compact('task', 'teams', 'members', 'tags'));
-}
-
-
-public function update(Request $request, $id)
-{
-    $task = Task::findOrFail($id);
-
-    // Validation des données
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'team_id' => 'required|exists:teams,id',
-        'owner_id' => 'nullable|exists:users,id',
-        'status' => 'required|in:not_started,in_progress,completed',
-        'start_date' => 'nullable|date',
         'end_date' => 'nullable|date|after_or_equal:start_date',
-        'tags' => 'nullable|array',
+        'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,bmp,doc,docx,ppt,pptx,xls,xlsx,pdf',
         'tags.*' => 'exists:tags,id',
-        'media.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,docx|max:2048',
     ]);
 
-    // Mise à jour des informations de la tâche
+    // Création de la tâche
     $task->update([
         'title' => $request->input('title'),
         'description' => $request->input('description'),
         'team_id' => $request->input('team_id'),
-        'owner' => $request->input('owner_id'),
+        'owner' => $request->input('owner_id') ?: auth()->id(), // Assigner à soi-même si aucun owner_id n'est fourni
+        'project_id' => $request->input('project_id'),
         'status' => $request->input('status'),
+        'type' => $request->input('type'),
+        'parent_task_id' => $request->input('parent_task_id'),
         'start_date' => $request->input('start_date'),
         'end_date' => $request->input('end_date'),
     ]);
-
-    // Gestion des pièces jointes
+    
+    // Gestion des fichiers média
     if ($request->hasFile('media')) {
         foreach ($request->file('media') as $file) {
-            $path = $file->store('public/media');
-            $task->media()->create(['path' => $path]);
+            $extension = $file->getClientOriginalExtension();
+
+            if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
+                $path = $file->store('task_images');
+            } else {
+                $path = $file->store('task_documents');
+            }
+
+            $media = Media::create(['path' => $path]);
+            $task->media()->attach($media->id);
         }
     }
+    
+    // Attacher les tags
+    if ($request->has('tags')) {
+        $task->tags()->attach($request->input('tags'));
+    }
 
-    // Gestion des tags
-    $task->tags()->sync($request->input('tags', []));
-
-    return redirect()->route('tasks.index')->with('success', 'Task updated successfully');
+    return redirect()->route('tasks.index')->with('success', 'New task adupdated successfully');
 }
 
-public function show($id)
+
+public function show(Task $task)
 {
-    $task = Task::findOrFail($id);
-    return view('tasks.show', compact('task'));
+    // Chemin relatif depuis le dossier public
+    $filePath = 'task_documents/' . $task->document_path;
+
+    // Obtenez l'URL du fichier
+    $url = Storage::disk('public')->url($filePath);
+
+    return view('tasks.show', compact('task', 'url'));
 }
+
+
+
+
+
 
 
     public function destroy(Task $task)

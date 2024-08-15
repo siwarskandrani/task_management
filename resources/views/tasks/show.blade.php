@@ -1,19 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tâche Détails</title>
-</head>
-<body>
-    <h1>{{ $task->title }}</h1>
-    <p><strong>Description:</strong> {{ $task->description }}</p>
-    <p><strong>Équipe:</strong> {{ $task->team->name ?? 'N/A' }}</p>
-    <p><strong>Propriétaire:</strong> {{ $task->owner ? $task->owner->name : 'N/A' }}</p>
-    <p><strong>Statut:</strong> {{ $task->status }}</p>
-    <p><strong>Date de début:</strong> {{ $task->start_date }}</p>
-    <p><strong>Date de fin:</strong> {{ $task->end_date }}</p>
+@extends('layouts.app')
 
-    <!-- Ajouter plus d'informations ou fonctionnalités ici -->
-
-    <a href="{{ route('tasks.index') }}">Retour à la liste des tâches</a>
-</body>
-</html>
+@section('create_task')
+<div class="container">
+    <div class="mb-3">
+        <p><strong>Title:</strong> {{ $task->title }}</p>
+    </div>
+    <div class="mb-3">
+        <p><strong>Description:</strong> {{ $task->description }}</p>
+    </div>
+    <div class="mb-3">
+        <p><strong>Team:</strong> {{ $task->team->name ?? 'N/A' }}</p>
+    </div>
+    <div class="mb-3">
+        <p><strong>Owner:</strong> {{ $task->owner->name ?? 'N/A' }}</p>
+    </div>
+    <div class="mb-3">
+        <p><strong>Status:</strong> {{ $task->status }}</p>
+    </div>
+    <div class="mb-3">
+        <p><strong>Start Date:</strong> {{ $task->start_date }}</p>
+    </div>
+    <div class="mb-3">
+        <p><strong>End Date:</strong> {{ $task->end_date }}</p>
+    </div>
+    <div class="mb-3">
+        <p><strong>Attachments:</strong></p>
+        @if($task->media->isNotEmpty())
+        @foreach($task->media as $media)
+            @if (strpos($media->path, 'task_images') !== false)
+                <img src="{{ asset('storage/task_images/' . $media->path) }}" width="300px" alt="Media">
+            @elseif (strpos($media->path, 'task_documents') !== false)
+                <a href="{{ asset('storage/task_documents/' . $media->path) }}" target="_blank">View Document</a>
+            @endif
+        @endforeach
+    @else
+        <p>No attachments</p>
+    @endif
+    
+    </div>
+</div>
+@endsection

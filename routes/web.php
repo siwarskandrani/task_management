@@ -8,6 +8,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\TagController;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,7 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::resource('teams', TeamController::class); //un seul route fait l'appel a tous les fonction du contoleur product
     Route::resource('projects', ProjectController::class); //un seul route fait l'appel a tous les fonction du contoleur product
+    Route::get('/tasks/show', [TaskController::class, 'show'])->name('tasks.show');
     Route::get('/tasks/calendar', [TaskController::class, 'calendar'])->name('tasks.calendar');
     Route::resource('tasks', TaskController::class); //un seul route fait l'appel a tous les fonction du contoleur product
     Route::get('/teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');
@@ -46,6 +48,16 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
 Route::get('auth/{driver}/redirect', [SocialLoginController::class, 'redirectToProvider'])->where('driver', 'google|facebook');
 Route::get('auth/{driver}/login', [SocialLoginController::class, 'handleProviderCallback'])->where('driver', 'google|facebook');
 //Route::get('/sendEmail', [EmailVeriController::class, 'send']);
+
+Route::get('/storage/{filename}', function ($filename) {
+    $filePath = 'task_documents/' . $filename;
+    if (Storage::exists($filePath)) {
+        return response()->file(Storage::path($filePath));
+    } else {
+        abort(404);
+    }
+});
+
 
 // routes/web.php
 

@@ -16,7 +16,7 @@ class MediaController extends Controller
 
         if ($request->hasFile('media')) {
             $file = $request->file('media');
-            $path = $file->store('media', 'public'); // on stolke les files dans le dossier storage/app/media
+            $path = $file->store('task_media'); // on stolke les files dans le dossier storage/app/media
 
             $media = Media::create(['path' => $path]);
 
