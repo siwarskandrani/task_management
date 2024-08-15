@@ -27,11 +27,9 @@
         <p><strong>Attachments:</strong></p>
         @if($task->media->isNotEmpty())
         @foreach($task->media as $media)
-            @if (strpos($media->path, 'task_images') !== false)
-                <img src="{{ asset('storage/task_images/' . $media->path) }}" width="300px" alt="Media">
-            @elseif (strpos($media->path, 'task_documents') !== false)
-                <a href="{{ asset('storage/task_documents/' . $media->path) }}" target="_blank">View Document</a>
-            @endif
+      
+                <a href="{{ asset('storage/' . $media->path) }}" target="_blank">{{ $media->name }}</a>
+            
         @endforeach
     @else
         <p>No attachments</p>

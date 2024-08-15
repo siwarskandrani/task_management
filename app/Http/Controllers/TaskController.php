@@ -75,21 +75,22 @@ class TaskController extends Controller
             'end_date' => $request->input('end_date'),
         ]);
         
-        // Gestion des fichiers média
-        if ($request->hasFile('media')) {
-            foreach ($request->file('media') as $file) {
-                $extension = $file->getClientOriginalExtension();
-    
-                if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
-                    $path = $file->store('task_images');
-                } else {
-                    $path = $file->store('task_documents');
-                }
-    
-                $media = Media::create(['path' => $path]);
-                $task->media()->attach($media->id);
-            }
-        }
+       // Gestion des fichiers média
+if ($request->hasFile('media')) {
+    foreach ($request->file('media') as $file) {
+        $extension = $file->getClientOriginalExtension();
+        $originalName = $file->getClientOriginalName(); // Récupère le nom original
+
+        $path = $file->store('task_documents', 'public'); // Stocke le fichier dans le disque public
+
+        $media = Media::create([
+            'path' => $path,
+            'name' => $originalName // Stocke le nom original du fichier
+        ]);
+        $task->media()->attach($media->id);
+    }
+}
+
         
         
         // Attacher les tags

@@ -9,7 +9,7 @@ class Media extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['path']; //les colonnes qui peuvent être remplies via un formulaire n7ottouhom f fillable
+    protected $fillable = ['path','name']; //les colonnes qui peuvent être remplies via un formulaire n7ottouhom f fillable
 
     public function tasks()
     {
