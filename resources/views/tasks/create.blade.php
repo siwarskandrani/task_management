@@ -160,7 +160,7 @@
             <div class="text-danger">{{ $message }}</div>
         @enderror
     </div>
-    <div id="media-preview" class="d-flex flex-wrap"></div>
+    {{-- <div id="media-preview" class="d-flex flex-wrap"></div> --}}
 
 
         <button type="submit" class="btn btn-primary">Submit</button>

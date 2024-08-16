@@ -122,10 +122,25 @@ if ($request->hasFile('media')) {
         
         $tags = Tag::all();
         
-        // Assurez-vous que la tâche inclut les relations nécessaires (team et owner)
       //  $task->load('team', 'owner');
       //  dd($task);
-        return view('tasks.edit', compact('projects', 'teams', 'parent_tasks', 'tags', 'task'));
+     
+      $isAdmin = false;
+
+      // Vérifiez si la tâche est associée à une équipe
+      if ($task->team_id && $task->team) {
+          // Vérifiez si l'utilisateur est un administrateur de l'équipe associée à la tâche
+          $isAdmin = $task->team->users()
+              ->wherePivot('role', 'admin')
+              ->where('user__teams.ID_user', $userId)
+              ->exists();
+      }
+      $isEditable = !$task->team_id || $isAdmin; // Champs ouverts si team_id est nul ou utilisateur est admin
+
+      if (!$isEditable) {
+        return view('tasks.edit_member', compact('projects', 'teams', 'parent_tasks', 'tags', 'task','isEditable'));
+    }
+        return view('tasks.edit', compact('projects', 'teams', 'parent_tasks', 'tags', 'task','isEditable'));
     }
     
     
@@ -166,19 +181,21 @@ public function update(Request $request, $id)
         'start_date' => $request->input('start_date'),
         'end_date' => $request->input('end_date'),
     ]);
-    
-    // Gestion des fichiers média
+
+
+
+
     if ($request->hasFile('media')) {
         foreach ($request->file('media') as $file) {
             $extension = $file->getClientOriginalExtension();
-
-            if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
-                $path = $file->store('task_images');
-            } else {
-                $path = $file->store('task_documents');
-            }
-
-            $media = Media::create(['path' => $path]);
+            $originalName = $file->getClientOriginalName(); // Récupère le nom original
+    
+            $path = $file->store('task_documents', 'public'); // Stocke le fichier dans le disque public
+    
+            $media = Media::create([
+                'path' => $path,
+                'name' => $originalName // Stocke le nom original du fichier
+            ]);
             $task->media()->attach($media->id);
         }
     }
@@ -187,6 +204,7 @@ public function update(Request $request, $id)
     if ($request->has('tags')) {
         $task->tags()->attach($request->input('tags'));
     }
+    dd($request->all());
 
     return redirect()->route('tasks.index')->with('success', 'New task adupdated successfully');
 }
@@ -239,6 +257,21 @@ public function show(Task $task)
         return view('tasks.calendar', ['tasks' => $tasks]);
     }
     
+
+    public function removeMedia(Request $request, $taskId, $mediaId)
+    {
+        $task = Task::findOrFail($taskId);
+    
+        $media = $task->media()->where('id', $mediaId)->firstOrFail();
+    
+        $media->delete();
+    
+  
+        return redirect()->back()->with('success', 'Media removed successfully');
+    }
+    
+    
+
     }
     
     

@@ -25,4 +25,21 @@ class MediaController extends Controller
 
         return response()->json(['error' => 'No media file uploaded'], 400);
     }
+
+
+    public function destroy($mediaId)
+    {
+        $media = Media::find($mediaId);
+        if ($media) {
+            // Delete the file from storage
+            \Storage::disk('public')->delete($media->path);
+            
+            // Delete the record from the database
+            $media->delete();
+            
+            return redirect()->back()->with('success', 'Media deleted successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Media not found.');
+    }
 }

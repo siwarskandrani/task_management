@@ -41,10 +41,10 @@
         <!-- Team -->
         <div class="form-group mb-3">
             <label for="team_id">Team</label>
-            <select name="team_id" id="team_id" class="form-select">
+            <select name="team_id" id="team_id" class="form-select" >
                 <option value="">None</option>
                 @foreach($teams as $team)
-                    <option value="{{ $team->id }}" {{ old('team_id', $task->team_id) == $team->id ? 'selected' : '' }}>
+                    <option value="{{ $team->id }}" {{ old('team_id', $task->team_id) == $team->id ? 'selected' : '' }} >
                         {{ $team->name }}
                     </option>
                 @endforeach
@@ -78,7 +78,7 @@
         <!-- Projet -->
         <div class="form-group mb-3">
             <label for="project_id">Project</label>
-            <select name="project_id" id="project_id" class="form-select">
+            <select name="project_id" id="project_id" class="form-select"  >
                 <option value="">None</option>
                 @foreach($projects as $project)
                     <option value="{{ $project->id }}" {{ old('project_id', $task->project_id) == $project->id ? 'selected' : '' }}>
@@ -90,7 +90,35 @@
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
+   <!-- Médias -->
+                <!-- existing Médias -->
 
+                <div class="form-group mb-3">
+                    <div id="existing_media" class="d-flex flex-wrap">
+                        @foreach($task->media as $media)
+                            <div class="media-item">
+                                <a href="{{ asset('storage/' . $media->path) }}" target="_blank">{{ $media->name }}</a>
+                                 {{-- <form action="{{ route('tasks.removeMedia', ['taskId' => $task->id, 'mediaId' => $media->id]) }}" method="POST" >
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="submitDeleteForm(this)">×</button>
+                                </form>  --}}
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                
+        
+            <!-- Médias -->
+            <div class="form-group mb-3">
+                <label for="media">Add Media</label>
+                <input type="file" name="media[]" id="media" class="form-control" multiple>
+                @error('media.*')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+        
+            </div>
+            <div id="media-preview" class="d-flex flex-wrap"></div>
         <!-- Statut -->
         <div class="form-group mb-3">
             <label for="status">Status</label>
@@ -107,7 +135,7 @@
         <!-- Tags -->
         <div class="form-group mb-3">
             <label for="tags">Tags</label>
-            <select id="tags" name="tags[]" class="form-control" multiple>
+            <select id="tags" name="tags[]" class="form-control"   multiple>
                 @foreach($tags as $tag)
                     <option value="{{ $tag->id }}" 
                         {{ (in_array($tag->id, old('tags', $task->tags->pluck('id')->toArray()))) ? 'selected' : '' }}>
@@ -123,7 +151,7 @@
         <!-- Type -->
         <div class="form-group mb-3">
             <label for="type">Type</label>
-            <select name="type" id="type" class="form-select" required>
+            <select name="type" id="type" class="form-select"  required>
                 <option value="1" {{ old('type', $task->type) == 1 ? 'selected' : '' }}>Main task</option>
                 <option value="2" {{ old('type', $task->type) == 2 ? 'selected' : '' }}>Sub task</option>
             </select>
@@ -135,7 +163,7 @@
         <!-- Parent Task -->
         <div class="form-group mb-3">
             <label for="parent_task">Parent Task</label>
-            <select name="parent_task" id="parent_task" class="form-select">
+            <select name="parent_task" id="parent_task" class="form-select"{{ !$isEditable ? 'disabled' : '' }} >
                 <option value="">None</option>
                 @foreach($parent_tasks as $parentTask)
                     <option value="{{ $parentTask->id }}" {{ old('parent_task', $task->parent_task_id) == $parentTask->id ? 'selected' : '' }}>
@@ -151,7 +179,7 @@
         <!-- Dates -->
         <div class="form-group mb-3">
             <label for="start_date">Start Date</label>
-            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date', $task->start_date) }}">
+            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date', $task->start_date) }}"{{ !$isEditable ? 'disabled' : '' }} >
             @error('start_date')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
@@ -159,46 +187,97 @@
 
         <div class="form-group mb-3">
             <label for="end_date">End Date</label>
-            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ old('end_date', $task->end_date) }}">
+            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ old('end_date', $task->end_date) }}"{{ !$isEditable ? 'disabled' : '' }} >
             @error('end_date')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
 
-        <!-- Médias -->
-         <!-- Médias existants -->
-        <div class="form-group mb-3">
-            <label for="existing_media">Existing Media</label>
-            <div id="existing_media" class="d-flex flex-wrap">
-                @foreach($task->media as $media)
-                    <div class="media-item">
-                        <img src="{{ asset('storage/'.$media->path) }}" alt="Media" class="img-thumbnail" style="width: 150px; height: 150px;">
-                        <input type="checkbox" name="delete_media[]" value="{{ $media->id }}"> Delete
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-      
-
-    <!-- Médias -->
-    <div class="form-group mb-3">
-        <label for="media">Add Media</label>
-        <input type="file" name="media[]" id="media" class="form-control" multiple>
-        @error('media.*')
-            <div class="text-danger">{{ $message }}</div>
-        @enderror
-
-        <pre>{{ print_r($task->media) }}</pre>
-    </div>
-    <div id="media-preview" class="d-flex flex-wrap"></div>
+     
 
     <button type="submit" class="btn btn-primary">Update Task</button>
 </form>
 </div>
 
-        <button type="submit" class="btn btn-primary">Update Task</button>
-    </form>
+     
 
-</div>
+@section('scripts')
+<script>
+ document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const teamSelect = document.getElementById('team_id');
+    const assigneeSelect = document.getElementById('assignee_id');
+    const mediaInput = document.getElementById('media');
+    const mediaContainer = document.getElementById('media-preview');
+
+    // Fonction pour afficher les aperçus des médias
+    function displayMediaPreviews(media) {
+        mediaContainer.innerHTML = '';
+        media.forEach(mediaItem => {
+            const mediaElement = document.createElement('img');
+            mediaElement.src = `/storage/${mediaItem.path}`;
+            mediaElement.alt = 'Media Preview';
+            mediaElement.style.maxWidth = '100px';
+            mediaElement.style.margin = '5px';
+            mediaContainer.appendChild(mediaElement);
+        });
+    }
+
+    // Gestion du formulaire
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        fetch('{{ route('tasks.store') }}', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Task created successfully');
+                displayMediaPreviews(data.media); 
+            } else {
+                alert('Error creating task');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    // Fonction pour activer ou désactiver le champ "Assignee"
+    function toggleAssigneeField() {
+        if (teamSelect.value === "") { // Si "None" est sélectionné
+            assigneeSelect.disabled = true;
+            assigneeSelect.innerHTML = '<option value="{{ auth()->id() }}">Self Assignee</option>'; // Remet "Self Assignee"
+        } else {
+            assigneeSelect.disabled = false;
+            fetch(`/teams/${teamSelect.value}/members`)
+                .then(response => response.json())
+                .then(data => {
+                    assigneeSelect.innerHTML = '<option value="">Select an assignee</option>';
+                    
+                    data.members.forEach(member => {
+                        const option = document.createElement('option');
+                        option.value = member.id;
+                        option.textContent = member.name;
+                        assigneeSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching team members:', error));
+        }
+    }
+
+    // Appel initial pour définir l'état correct au chargement
+    toggleAssigneeField();
+
+    // Ajoute un écouteur pour le changement de la sélection de l'équipe
+    teamSelect.addEventListener('change', toggleAssigneeField);
+});
+
+</script>
+@endsection
+
+
+
 @endsection
