@@ -204,7 +204,7 @@ public function update(Request $request, $id)
     if ($request->has('tags')) {
         $task->tags()->attach($request->input('tags'));
     }
-    dd($request->all());
+    //dd($request->all());
 
     return redirect()->route('tasks.index')->with('success', 'New task adupdated successfully');
 }
@@ -227,11 +227,38 @@ public function show(Task $task)
 
 
 
-    public function destroy(Task $task)
-    {
-        $task->delete();
-        return redirect()->route('tasks.index')->with('success', 'Task deleted successfully');
+public function destroy(Request $request, Task $task)
+{
+    $userId = auth()->id();
+    $isAdmin = false;
+
+    // Vérifiez si la tâche est associée à une équipe
+    if ($task->team_id && $task->team) {
+        // Vérifiez si l'utilisateur est un administrateur de l'équipe associée à la tâche
+        $isAdmin = $task->team->users()
+            ->wherePivot('role', 'admin')
+            ->where('user__teams.ID_user', $userId)
+            ->exists();
     }
+
+    // Déterminez si la tâche est supprimable
+    $isDeletable = $isAdmin || !$task->team_id;
+
+    // Si l'utilisateur n'est pas autorisé à supprimer la tâche
+    if (!$isDeletable) {
+        return redirect()->back()->with('error', 'You do not have permission to delete this task.');
+    }
+
+    // Suppression de la tâche
+    $task->delete();
+
+    // Rediriger vers l'URL précédente
+    return redirect()->to(url()->previous())->with('success', 'Task deleted successfully'); //prevouis pour q'uil me redirige vers l'url quiest deja ouvert
+}
+
+
+
+
 
     
 
@@ -269,8 +296,40 @@ public function show(Task $task)
   
         return redirect()->back()->with('success', 'Media removed successfully');
     }
+
+
+//    
+
+public function showWorkloadByTeam()
+{
+    // Récupérer l'utilisateur connecté
+    $user = auth()->user();
     
+    // Récupérer les équipes auxquelles l'utilisateur appartient
+    $teams = $user->teams()->with(['users.tasks'])->get();
     
+    // Filtrer les tâches pour chaque utilisateur afin de ne montrer que celles de l'équipe
+    foreach ($teams as $team) {
+        foreach ($team->users as $user) {
+            $user->tasks = $user->tasks()->where('team_id', $team->id)->get();
+        }
+    }
+
+    return view('workload.index', compact('teams'));
+}
+
+
+
+
+public function showTasksByUser($id, $team_id)
+{
+    $user = User::findOrFail($id);
+    $tasks = $user->tasks()->where('team_id', $team_id)->get();
+    
+    return view('tasks.by_user', compact('user', 'tasks'));
+}
+
+
 
     }
     

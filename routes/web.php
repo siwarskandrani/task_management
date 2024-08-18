@@ -42,6 +42,9 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
     Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
     Route::delete('/tasks/{taskId}/media/{mediaId}', [MediaController::class, 'delete'])->name('tasks.removeMedia');
+   // Route::get('/workload', [TaskController::class, 'showWorkload'])->name('workload.index');
+   Route::get('/tasks/user/{id}/team/{team_id}', [TaskController::class, 'showTasksByUser'])->name('tasks.byUser');
+   Route::get('/workload/team', [TaskController::class, 'showWorkloadByTeam'])->name('workload.byTeam');
 
 });
 
