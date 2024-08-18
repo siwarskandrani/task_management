@@ -163,7 +163,7 @@
         <!-- Parent Task -->
         <div class="form-group mb-3">
             <label for="parent_task">Parent Task</label>
-            <select name="parent_task" id="parent_task" class="form-select"{{ !$isEditable ? 'disabled' : '' }} >
+            <select name="parent_task" id="parent_task" class="form-select">
                 <option value="">None</option>
                 @foreach($parent_tasks as $parentTask)
                     <option value="{{ $parentTask->id }}" {{ old('parent_task', $task->parent_task_id) == $parentTask->id ? 'selected' : '' }}>
@@ -179,7 +179,7 @@
         <!-- Dates -->
         <div class="form-group mb-3">
             <label for="start_date">Start Date</label>
-            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date', $task->start_date) }}"{{ !$isEditable ? 'disabled' : '' }} >
+            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date', $task->start_date) }}">
             @error('start_date')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
@@ -187,7 +187,7 @@
 
         <div class="form-group mb-3">
             <label for="end_date">End Date</label>
-            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ old('end_date', $task->end_date) }}"{{ !$isEditable ? 'disabled' : '' }} >
+            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ old('end_date', $task->end_date) }}" >
             @error('end_date')
                 <div class="text-danger">{{ $message }}</div>
             @enderror

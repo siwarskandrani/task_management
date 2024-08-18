@@ -62,9 +62,9 @@
     <header class="header" id="home">
         <div class="container">
             <div class="infos">
-                <h6 class="subtitle">hello,I'm</h6>
-                <h6 class="title">James Smith</h6>
-                <p>UI/UX Designer</p>
+                <h6 class="title">Welcome to</h6>
+                <h1>Task Management System</h1></br>
+                <p>Organize your tasks and manage your team effectively</p>
             </div>              
             <div class="img-holder">
                 <img src="assets/imgs/man.svg" alt="">
@@ -72,6 +72,9 @@
         </div>  
 
         
+        {{-- <h6 class="subtitle">Welcome to</h6>
+        <h6 class="title">Task Management System</h6>
+        <p>Organize your tasks and manage your team effectively</p> --}}
     </header>
     <!-- End of Page Header -->
     

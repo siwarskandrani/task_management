@@ -9,6 +9,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,7 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
    // Route::get('/workload', [TaskController::class, 'showWorkload'])->name('workload.index');
    Route::get('/tasks/user/{id}/team/{team_id}', [TaskController::class, 'showTasksByUser'])->name('tasks.byUser');
    Route::get('/workload/team', [TaskController::class, 'showWorkloadByTeam'])->name('workload.byTeam');
+   Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
 
 });
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
 
 use App\Models\Task;
 use App\Models\Team;
@@ -10,6 +11,7 @@ use App\Models\Project;
 use App\Models\User;
 use App\Models\Media;
 use App\Models\Tag;
+use App\Notifications\TaskUpdatedNotification;
 
 class TaskController extends Controller
 {
@@ -125,22 +127,22 @@ if ($request->hasFile('media')) {
       //  $task->load('team', 'owner');
       //  dd($task);
      
-      $isAdmin = false;
+    //   $isAdmin = false;
 
-      // Vérifiez si la tâche est associée à une équipe
-      if ($task->team_id && $task->team) {
-          // Vérifiez si l'utilisateur est un administrateur de l'équipe associée à la tâche
-          $isAdmin = $task->team->users()
-              ->wherePivot('role', 'admin')
-              ->where('user__teams.ID_user', $userId)
-              ->exists();
-      }
-      $isEditable = !$task->team_id || $isAdmin; // Champs ouverts si team_id est nul ou utilisateur est admin
+    //   // Vérifiez si la tâche est associée à une équipe
+    //   if ($task->team_id && $task->team) {
+    //       // Vérifiez si l'utilisateur est un administrateur de l'équipe associée à la tâche
+    //       $isAdmin = $task->team->users()
+    //           ->wherePivot('role', 'admin')
+    //           ->where('user__teams.ID_user', $userId)
+    //           ->exists();
+    //   }
+    //   $isEditable = !$task->team_id || $isAdmin; // Champs ouverts si team_id est nul ou utilisateur est admin
 
-      if (!$isEditable) {
-        return view('tasks.edit_member', compact('projects', 'teams', 'parent_tasks', 'tags', 'task','isEditable'));
-    }
-        return view('tasks.edit', compact('projects', 'teams', 'parent_tasks', 'tags', 'task','isEditable'));
+    //   if (!$isEditable) {
+    //     return view('tasks.edit_member', compact('projects', 'teams', 'parent_tasks', 'tags', 'task','isEditable'));
+    // }
+        return view('tasks.edit', compact('projects', 'teams', 'parent_tasks', 'tags', 'task'));
     }
     
     
@@ -205,7 +207,11 @@ public function update(Request $request, $id)
         $task->tags()->attach($request->input('tags'));
     }
     //dd($request->all());
-
+    if ($task->team_id) {
+        $team = Team::findOrFail($task->team_id);
+        $teamMembers = $team->users; // Récupère les utilisateurs de l'équipe
+        Notification::send($teamMembers, new TaskUpdatedNotification($task));
+    }
     return redirect()->route('tasks.index')->with('success', 'New task adupdated successfully');
 }
 

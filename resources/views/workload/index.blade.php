@@ -7,7 +7,6 @@
     @foreach($teams as $team)
         <div class="team-section mb-4 p-4 border rounded" style="background-color: #f8f9fa;">
             <h2 class="text-primary">{{ $team->name }}</h2></br>
-
             <!-- Task Distribution Table -->
             <div class="mb-4">
                 <table class="table table-striped table-bordered">
