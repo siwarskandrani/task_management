@@ -19,7 +19,7 @@
     <form action="{{ route('tasks.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
-        <!-- titrr -->
+        <!-- Title -->
         <div class="form-group mb-3">
             <label for="title">Title</label>
             <input type="text" name="title" id="title" class="form-control" value="{{ old('title') }}" required>
@@ -28,7 +28,7 @@
             @enderror
         </div>
 
-        <!-- description -->
+        <!-- Description -->
         <div class="form-group mb-3">
             <label for="description">Description</label>
             <textarea name="description" id="description" class="form-control">{{ old('description') }}</textarea>
@@ -37,77 +37,64 @@
             @enderror
         </div>
 
-   <!-- team -->
-<div class="form-group mb-3">
-    <label for="team_id">Team</label>
-    <select name="team_id" id="team_id" class="form-select">
-        <option value="">None</option> <!-- Option None pour aucune équipe -->
-        @foreach($teams as $team)
-            <option value="{{ $team->id }}">{{ $team->name }}</option>
-        @endforeach
-    </select>
-    @error('team_id')
-        <div class="text-danger">{{ $message }}</div>
-    @enderror
-</div>
+        <!-- Team -->
+        <div class="form-group mb-3">
+            <label for="team_id">Team</label>
+            <select name="team_id" id="team_id" class="form-select">
+                <option value="">None</option>
+                @foreach($teams as $team)
+                    <option value="{{ $team->id }}">{{ $team->name }}</option>
+                @endforeach
+            </select>
+            @error('team_id')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+        </div>
 
-<!-- owner -->
-<div class="form-group mb-3">
-    <label for="owner_id">Assignee</label>
-    <select name="owner_id" id="assignee_id" class="form-select" disabled> <!-- Disabled par défaut -->
-        <option value="{{ auth()->id() }}">Self Assignee</option> <!-- Option Self Assignee par défaut -->
-        @foreach($teams as $team)
-            @foreach($team->users as $user) <!-- Lister les utilisateurs de chaque équipe -->
-                <option value="{{ $user->id }}">{{ $user->name }}</option>
-            @endforeach
-        @endforeach
-    </select>
-    @error('owner_id')
-        <div class="text-danger">{{ $message }}</div>
-    @enderror
-</div>
+        <!-- Assignee -->
+        <div class="form-group mb-3">
+            <label for="owner_id">Assignee</label>
+            <select name="owner_id" id="assignee_id" class="form-select" disabled>
+                <option value="{{ auth()->id() }}">Self Assignee</option>
+                <!-- Options will be populated via JavaScript -->
+            </select>
+            @error('owner_id')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+        </div>
 
+        <!-- Project -->
+        <div class="form-group mb-3">
+            <label for="project_id">Project</label>
+            <select name="project_id" id="project_id" class="form-select">
+                <option value="">None</option>
+                @foreach($projects as $project)
+                    <option value="{{ $project->id }}">{{ $project->name }}</option>
+                @endforeach
+            </select>
+            @error('project_id')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+        </div>
 
-
-
-    <!--projet -->
-<div class="form-group mb-3">
-    <label for="project_id">Project</label>
-    <select name="project_id" id="project_id" class="form-select">
-        <option value="">None</option>
-        @foreach($projects as $project)
-            <option value="{{ $project->id }}">{{ $project->name }}</option>
-        @endforeach
-    </select>
-    @error('project_id')
-        <div class="text-danger">{{ $message }}</div>
-    @enderror
-</div>
-
-
-        <!-- statut -->
+        <!-- Status -->
         <div class="form-group mb-3">
             <label for="status">Status</label>
-            <select name="status" id="status" class="form-select" required>
-                <option value="not_started" {{ old('status') == 'not_started' ? 'selected' : '' }}>Not Started</option>
-                <option value="in_progress" {{ old('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-            </select>
+            <input type="text" id="status_display" class="form-control" value="Not Started" readonly>
+            <input type="hidden" name="status" id="status" value="1">
             @error('status')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
-        {{-- tags --}}
+
+        <!-- Tags -->
         <div class="form-group mb-3">
-            <label for="tags">Tags</label>
-            <select id="tags" name="tags[]" class="form-control" multiple>
-                @foreach($tags as $tag)
-                    <option value="{{ $tag->id }}">{{ $tag->name }}</option>
-                @endforeach
+            <label for="tags">Tags:</label>
+            <select id="tags" name="tags[]" class="form-select" multiple>
             </select>
         </div>
-        
-        <!-- Sélection du type -->
+
+        <!-- Type -->
         <div class="form-group mb-3">
             <label for="type">Type</label>
             <select name="type" id="type" class="form-select" required>
@@ -119,7 +106,7 @@
             @enderror
         </div>
 
-        <!-<!-- Parent Task -->
+        <!-- Parent Task -->
         <div class="form-group mb-3">
             <label for="parent_task">Parent Task</label>
             <select name="parent_task" id="parent_task" class="form-select">
@@ -134,12 +121,11 @@
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
-        
 
         <!-- Dates -->
         <div class="form-group mb-3">
             <label for="start_date">Start Date</label>
-            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}">
+            <input type="datetime-local" name="start_date" id="start_date" class="form-control" value="{{ old('start_date') }}">
             @error('start_date')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
@@ -147,29 +133,75 @@
 
         <div class="form-group mb-3">
             <label for="end_date">End Date</label>
-            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ old('end_date') }}">
+            <input type="datetime-local" name="end_date" id="end_date" class="form-control" value="{{ old('end_date') }}">
             @error('end_date')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
-     <!-- Médias -->
-     <div class="form-group mb-3">
-        <label for="media">Add Media</label>
-        <input type="file" name="media[]" id="media" class="form-control" multiple>
-        @error('media.*')
-            <div class="text-danger">{{ $message }}</div>
-        @enderror
-    </div>
-    {{-- <div id="media-preview" class="d-flex flex-wrap"></div> --}}
 
+        <!-- Media -->
+        <div class="form-group mb-3">
+            <label for="media">Add Media</label>
+            <input type="file" name="media[]" id="media" class="form-control" multiple>
+            @error('media.*')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+        </div>
+        <div id="media-preview" class="d-flex flex-wrap"></div>
 
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
-</div>
+@endsection
 
 @section('scripts')
 <script>
- document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    const tagsSelect = $('#tags');
+
+    // Initialisation de Selectize pour les tags
+    tagsSelect.selectize({
+        plugins: ['remove_button'],
+        delimiter: ',',
+        create: true,
+        valueField: 'id',
+        labelField: 'name',
+        searchField: 'name',
+        load: function(query, callback) {
+            if (!query.length) return callback();
+            fetch(`/tags?query=${query}`)
+                .then(response => response.json())
+                .then(data => callback(data))
+                .catch(error => console.error('Error fetching tags:', error));
+        },
+        onItemAdd: function(value, $item) {
+            // Vérifie si le tag est nouveau
+            if (!$item.data('isNew')) return;
+
+            fetch('{{ route('tags.store') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.tag) {
+                    // Met à jour l'élément avec la valeur correcte
+                    $item.data('value', data.tag.id);
+                    $item.removeData('isNew');
+                    // Ajoute le nouveau tag à la liste de sélection
+                    tagsSelect[0].selectize.addOption({ id: data.tag.id, name: data.tag.name });
+                    tagsSelect[0].selectize.addItem(data.tag.id);
+                } else {
+                    alert('Error creating tag');
+                }
+            })
+            .catch(error => console.error('Error creating tag:', error));
+        }
+    });
+
     const form = document.querySelector('form');
     const teamSelect = document.getElementById('team_id');
     const assigneeSelect = document.getElementById('assignee_id');
@@ -185,6 +217,30 @@
             mediaElement.alt = 'Media Preview';
             mediaElement.style.maxWidth = '100px';
             mediaElement.style.margin = '5px';
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.className = 'btn btn-danger btn-sm';
+            deleteButton.onclick = function() {
+                fetch(`/media/${mediaItem.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Media deleted successfully');
+                        displayMediaPreviews(data.media); // Update media previews
+                    } else {
+                        alert('Error deleting media');
+                    }
+                })
+                .catch(error => console.error('Error deleting media:', error));
+            };
+
+            mediaElement.appendChild(deleteButton);
             mediaContainer.appendChild(mediaElement);
         });
     }
@@ -203,47 +259,39 @@
         .then(data => {
             if (data.success) {
                 alert('Task created successfully');
-                displayMediaPreviews(data.media); 
+                displayMediaPreviews(data.media);
+                form.reset(); // Optionnel: Réinitialiser le formulaire après succès
             } else {
                 alert('Error creating task');
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error creating task:', error));
     });
 
     // Fonction pour activer ou désactiver le champ "Assignee"
     function toggleAssigneeField() {
         if (teamSelect.value === "") { // Si "None" est sélectionné
             assigneeSelect.disabled = true;
-            assigneeSelect.innerHTML = '<option value="{{ auth()->id() }}">Self Assignee</option>'; // Remet "Self Assignee"
+            assigneeSelect.innerHTML = '<option value="{{ auth()->id() }}">Self Assignee</option>';
         } else {
             assigneeSelect.disabled = false;
             fetch(`/teams/${teamSelect.value}/members`)
                 .then(response => response.json())
                 .then(data => {
-                    assigneeSelect.innerHTML = '<option value="">Select an assignee</option>';
-                    
+                    assigneeSelect.innerHTML = '<option value="">Select Assignee</option>';
                     data.members.forEach(member => {
-                        const option = document.createElement('option');
-                        option.value = member.id;
-                        option.textContent = member.name;
-                        assigneeSelect.appendChild(option);
+                        assigneeSelect.innerHTML += `<option value="${member.id}">${member.name}</option>`;
                     });
                 })
                 .catch(error => console.error('Error fetching team members:', error));
         }
     }
 
-    // Appel initial pour définir l'état correct au chargement
-    toggleAssigneeField();
-
-    // Ajoute un écouteur pour le changement de la sélection de l'équipe
+    // Événement de changement pour le sélecteur d'équipe
     teamSelect.addEventListener('change', toggleAssigneeField);
 });
 
+
+
 </script>
-@endsection
-
-
-
 @endsection

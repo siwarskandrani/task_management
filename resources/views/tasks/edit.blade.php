@@ -44,8 +44,8 @@
             <select name="team_id" id="team_id" class="form-select" >
                 <option value="">None</option>
                 @foreach($teams as $team)
-                    <option value="{{ $team->id }}" {{ old('team_id', $task->team_id) == $team->id ? 'selected' : '' }} >
-                        {{ $team->name }}
+                    <option value="{{ $team->id }}" {{ old('team_id', $task->team_id) == $team->id ? 'selected' : '' }} > {{-- value fiha l variable elli bch yodhhor kima l placeholder(fiha l valeur ancien)--}}
+                        {{ $team->name }} {{--et ici on met le nouveau variable mtaana--}}
                     </option>
                 @endforeach
             </select>
@@ -123,22 +123,23 @@
         <div class="form-group mb-3">
             <label for="status">Status</label>
             <select name="status" id="status" class="form-select" required>
-                <option value="not_started" {{ old('status', $task->status) == 'not_started' ? 'selected' : '' }}>Not Started</option>
-                <option value="in_progress" {{ old('status', $task->status) == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                <option value="completed" {{ old('status', $task->status) == 'completed' ? 'selected' : '' }}>Completed</option>
+                <option value="1" {{ old('status', $task->status) == '1' ? 'selected' : '' }}>Not Started</option>
+                <option value="2" {{ old('status', $task->status) == '2' ? 'selected' : '' }}>In Progress</option>
+                <option value="3" {{ old('status', $task->status) == '3' ? 'selected' : '' }}>Completed</option>
             </select>
             @error('status')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
 
-        <!-- Tags -->
+
+        <!-- tags -->
+
         <div class="form-group mb-3">
             <label for="tags">Tags</label>
-            <select id="tags" name="tags[]" class="form-control"   multiple>
+            <select name="tags[]" id="tags" class="form-select" multiple>
                 @foreach($tags as $tag)
-                    <option value="{{ $tag->id }}" 
-                        {{ (in_array($tag->id, old('tags', $task->tags->pluck('id')->toArray()))) ? 'selected' : '' }}>
+                    <option value="{{ $tag->name }}" {{ in_array($tag->id, old('tags', $task->tags->pluck('id')->toArray())) ? 'selected' : '' }}> 
                         {{ $tag->name }}
                     </option>
                 @endforeach
@@ -147,6 +148,8 @@
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
+        
+
 
         <!-- Type -->
         <div class="form-group mb-3">
@@ -179,7 +182,7 @@
         <!-- Dates -->
         <div class="form-group mb-3">
             <label for="start_date">Start Date</label>
-            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ old('start_date', $task->start_date) }}">
+            <input type="datetime-local" name="start_date" id="start_date" class="form-control" value="{{ old('start_date', $task->start_date) }}">
             @error('start_date')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
@@ -187,7 +190,7 @@
 
         <div class="form-group mb-3">
             <label for="end_date">End Date</label>
-            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ old('end_date', $task->end_date) }}" >
+            <input type="datetime-local" name="end_date" id="end_date" class="form-control" value="{{ old('end_date', $task->end_date) }}" >
             @error('end_date')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
@@ -203,7 +206,67 @@
 
 @section('scripts')
 <script>
- document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    var tagsSelect = $('#tags').selectize({
+        plugins: ['remove_button'],
+        delimiter: ',',
+        create: true,
+        valueField: 'id',
+        labelField: 'name',
+        searchField: 'name',
+        load: function(query, callback) {
+            if (!query.length) return callback();
+            fetch(`/tags?query=${query}`)
+                .then(response => response.json())
+                .then(data => callback(data))
+                .catch(error => console.error('Error fetching tags:', error));
+        },
+        onItemAdd: function(value, $item) {
+            if (!$item.data('isNew')) return;
+
+            fetch('{{ route('tags.store') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.tag) {
+                    $item.data('value', data.tag.id);
+                    $item.removeData('isNew');
+                    tagsSelect[0].selectize.addOption({ id: data.tag.id, text: data.tag.name });
+                    tagsSelect[0].selectize.addItem(data.tag.id);
+                } else {
+                    alert('Error creating tag');
+                }
+            })
+            .catch(error => console.error('Error creating tag:', error));
+        },
+        onItemRemove: function(value, $item) {
+            // Suppression de l'association de tag à la tâche
+            fetch('{{ route('tasks.update', $task->id) }}', {
+                method: 'PUT',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ tags: tagsSelect[0].selectize.getValue() })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    $item.remove();
+                } else {
+                    alert('Error updating task tags');
+                }
+            })
+            .catch(error => console.error('Error updating task tags:', error));
+        }
+    });
+
     const form = document.querySelector('form');
     const teamSelect = document.getElementById('team_id');
     const assigneeSelect = document.getElementById('assignee_id');

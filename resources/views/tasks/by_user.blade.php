@@ -36,7 +36,7 @@
                     <td>{{ $task->start_date }}</td>
                     <td>{{ $task->end_date }}</td>
                     <td>
-                        <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?');">
+                        <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" onsubmit="return confirm('You want really delete this task ?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>

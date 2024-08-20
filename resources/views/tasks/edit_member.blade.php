@@ -53,12 +53,12 @@
             </div>
             <div id="media-preview" class="d-flex flex-wrap"></div>
         <!-- Statut -->
-        <div class="form-group mb-3">
+        <div class="  <div class="form-group mb-3">
             <label for="status">Status</label>
             <select name="status" id="status" class="form-select" required>
-                <option value="not_started" {{ old('status', $task->status) == 'not_started' ? 'selected' : '' }}>Not Started</option>
-                <option value="in_progress" {{ old('status', $task->status) == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                <option value="completed" {{ old('status', $task->status) == 'completed' ? 'selected' : '' }}>Completed</option>
+                <option value="1" {{ old('status', $task->status) == '1' ? 'selected' : '' }}>Not Started</option>
+                <option value="2" {{ old('status', $task->status) == '2' ? 'selected' : '' }}>In Progress</option>
+                <option value="3" {{ old('status', $task->status) == '3' ? 'selected' : '' }}>Completed</option>
             </select>
             @error('status')
                 <div class="text-danger">{{ $message }}</div>

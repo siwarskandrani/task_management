@@ -40,10 +40,10 @@
                     @foreach($tasks as $task)
                         <tr class="table-primary">
                             <td>{{ $task->title }}</td>
-                            <td>{{ $task->project->name ?? 'N/A' }}</td>
-                            <td>{{ $task->team->name ?? 'N/A' }}</td>
-                            <td>{{ ucfirst(str_replace('_', ' ', $task->status)) }}</td>
-                            <td>{{ $task->start_date }}</td>
+                            <td>{{ $task->project->name ?? 'NULL' }}</td>
+                            <td>{{ $task->team->name ?? 'NULL' }}</td>
+                            <td>{{ $task->status_label }}</td>
+                             <td>{{ $task->start_date }}</td>
                             <td>{{ $task->end_date }}</td>
                             <td>
                                 <a href="{{ route('tasks.edit', $task->id) }}" class="btn btn-primary btn-sm">Edit</a>

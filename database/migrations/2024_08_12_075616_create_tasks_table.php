@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('status')->default('To do');
+            $table->unsignedTinyInteger('status')->default(Task::NOT_STARTED);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->foreignId('project_id')->nullable()->constrained()->onDelete('set null')->change();
+            $table->unsignedBigInteger('project_id')->nullable()->constrained()->onDelete('set null')->change();
             $table->unsignedBigInteger('owner');
             $table->unsignedTinyInteger('type')->default(1); // 1: main_task, 2: sub_task
             $table->unsignedBigInteger('parent_task')->nullable();

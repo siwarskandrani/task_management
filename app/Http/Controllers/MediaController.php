@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Media; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Task;
 
 class MediaController extends Controller
 {
@@ -27,19 +28,16 @@ class MediaController extends Controller
     }
 
 
-    public function destroy($mediaId)
+    public function destroy($taskId, $mediaId)
     {
-        $media = Media::find($mediaId);
-        if ($media) {
-            // Delete the file from storage
-            \Storage::disk('public')->delete($media->path);
-            
-            // Delete the record from the database
-            $media->delete();
-            
-            return redirect()->back()->with('success', 'Media deleted successfully.');
-        }
+        // Valider l'existence de la tâche et du média, puis procéder à la suppression
+        $task = Task::findOrFail($taskId);
+        $media = $task->media()->findOrFail($mediaId);
+        Storage::delete($media->path); // Supprimer le fichier du stockage
 
-        return redirect()->back()->with('error', 'Media not found.');
+        $media->delete(); // Supprimer l'enregistrement du média
+
+        return redirect()->back()->with('success', 'Média supprimé avec succès.');
     }
 }
+    

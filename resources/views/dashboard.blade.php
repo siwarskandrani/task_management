@@ -20,7 +20,7 @@
             </div>
             <!-- Second Card -->
             <div class="col-md-4 col-sm-6">
-                <a href="" class="text-decoration-none">
+                <a href="{{ route('tasks.create') }}" class="text-decoration-none">
                     <div class="card">
                         <div class="position-relative">
                             <img src="{{ asset('images/20240801080737.jpg') }}" class="card-img-top" alt="Task Image" style="object-fit: cover; height: 200px;">
@@ -33,7 +33,7 @@
             </div>
             <!-- Third Card -->
             <div class="col-md-4 col-sm-6">
-                <a href="" class="text-decoration-none">
+                <a href="{{ route('projects.create') }}" class="text-decoration-none">
                     <div class="card">
                         <div class="position-relative">
                             <img src="{{ asset('images/20240801080737.jpg') }}" class="card-img-top" alt="Project Image" style="object-fit: cover; height: 200px;">
