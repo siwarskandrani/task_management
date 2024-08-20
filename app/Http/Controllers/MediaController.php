@@ -28,16 +28,28 @@ class MediaController extends Controller
     }
 
 
-    public function destroy($taskId, $mediaId)
-    {
+   public function destroy($taskId, $mediaId)
+{
+    try {
         // Valider l'existence de la tâche et du média, puis procéder à la suppression
         $task = Task::findOrFail($taskId);
         $media = $task->media()->findOrFail($mediaId);
-        Storage::delete($media->path); // Supprimer le fichier du stockage
 
-        $media->delete(); // Supprimer l'enregistrement du média
+        // Détacher le média de la tâche
+        $task->media()->detach($mediaId);
 
-        return redirect()->back()->with('success', 'Média supprimé avec succès.');
+        // Supprimer le fichier du stockage
+        Storage::delete($media->path);
+
+        // Supprimer l'enregistrement du média
+        $media->delete();
+
+        return response()->json(['success' => 'Media deleted successfully']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Error deleting media: ' . $e->getMessage()], 500);
     }
 }
+
+}
     
+

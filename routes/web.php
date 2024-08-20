@@ -42,7 +42,7 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
     Route::get('/teams/{team}/members', [TeamController::class, 'members'])->name('teams.members');
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
     Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
-    Route::delete('/tasks/{taskId}/media/{mediaId}', [MediaController::class, 'destroy'])->name('tasks.removeMedia');
+    Route::delete('/tasks/{taskId}/media/{mediaId}', [MediaController::class, 'destroy']);
    Route::get('/tasks/user/{id}/team/{team_id}', [TaskController::class, 'showTasksByUser'])->name('tasks.byUser');
    Route::get('/workload/team', [TaskController::class, 'showWorkloadByTeam'])->name('workload.byTeam');
    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');

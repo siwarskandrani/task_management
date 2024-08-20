@@ -105,6 +105,9 @@ class TaskController extends Controller
         // Attacher les tags à la tâche
         $task->tags()->attach($tags);
 }
+
+
+
     
         return redirect()->route('tasks.index')->with('success', 'New task added successfully');
     }
@@ -215,6 +218,9 @@ class TaskController extends Controller
             ]);
         }
     
+
+
+        
         // Gestion des fichiers media
         if ($request->hasFile('media')) {
             foreach ($request->file('media') as $file) {
@@ -231,20 +237,28 @@ class TaskController extends Controller
             }
         }
     
-         // Traitement des tags
-       // Gérer les tags
-       if ($request->has('tags')) {
-        // Récupérer ou créer les tags et obtenir leurs IDs
-        $newTagIds = collect($request->input('tags'))->map(function ($tagName) {
-            return Tag::firstOrCreate(['name' => $tagName])->id;
-        })->toArray();
+
+
         
-        // Synchroniser les tags ==>on fait l'attech entre les 2 tables task et tag en faisant un  appel a la function tags crée dans le model Task
-        $task->tags()->sync($newTagIds); ////on peut faire sync([]) ou attach()
+       //  Traitement des tags
+      // Attacher ou créer des tags
+      if ($request->has('tags')) {
+        // Collecter les tags soumis
+        $tags = collect($request->input('tags'))->map(function ($tagName) {
+            // Rechercher ou créer un tag
+            $tag = Tag::firstOrCreate(['name' => $tagName]);
+            return $tag->id; // Retourne l'id du tag
+        });
+        // Attacher les tags à la tâche
+        $task->tags()->sync($tags);
     } else {
-       // Si aucun tag n'est fourni, détacher tous les tags associés
-       $task->tags()->sync([]); //on peut faire sync([]) ou detach()
+        // Si aucun tag n'est fourni, détacher tous les tags associés
+        $task->tags()->detach(); // Cela retire tous les tags associés à la tâche
     }
+
+    
+    
+
     
         // // Envoyer des notifications si la tâche est associée à une équipe ==>7elha mbaad. rani sakartha bch manakhsarch l mailtrap
         // if ($task->team_id) {

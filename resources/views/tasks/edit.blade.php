@@ -93,23 +93,18 @@
    <!-- Médias -->
                 <!-- existing Médias -->
 
-                <div class="form-group mb-3">
-                    <div id="existing_media" class="d-flex flex-wrap">
-                        @foreach($task->media as $media)
-                            <div class="media-item">
-                                <a href="{{ asset('storage/' . $media->path) }}" target="_blank">{{ $media->name }}</a>
-                                 {{-- <form action="{{ route('tasks.removeMedia', ['taskId' => $task->id, 'mediaId' => $media->id]) }}" method="POST" >
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="submitDeleteForm(this)">×</button>
-                                </form>  --}}
-                            </div>
-                        @endforeach
+        <div class="form-group mb-3">
+            <label>Existing Media</label>
+            <div id="media-container" class="d-flex flex-wrap">
+                @foreach($task->media as $media)
+                    <div class="me-3 mb-3 position-relative">
+                        <a href="{{ Storage::url($media->path) }}" target="_blank">{{ $media->name }}</a>
+                        <button type="button" class="btn btn-danger btn-sm delete-media" data-media-id="{{ $media->id }}" data-task-id="{{ $task->id }}">×</button>
                     </div>
-                </div>
-                
-        
-            <!-- Médias -->
+                @endforeach
+            </div>
+        </div>
+                <!-- Médias -->
             <div class="form-group mb-3">
                 <label for="media">Add Media</label>
                 <input type="file" name="media[]" id="media" class="form-control" multiple>
@@ -285,7 +280,36 @@ document.addEventListener('DOMContentLoaded', function() {
             mediaContainer.appendChild(mediaElement);
         });
     }
+    document.querySelectorAll('.delete-media').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Delete button clicked'); // Debug log
 
+            const mediaId = this.getAttribute('data-media-id');
+            const taskId = this.getAttribute('data-task-id');
+
+            console.log('Media ID:', mediaId); // Debug log
+            console.log('Task ID:', taskId); // Debug log
+
+            fetch(`/tasks/${taskId}/media/${mediaId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Media deleted successfully'); // Debug log
+                    this.parentElement.remove(); // Remove media item from DOM
+                } else {
+                    alert('Error deleting media');
+                }
+            })
+            .catch(error => console.error('Error deleting media:', error));
+        });
+    });
     // Gestion du formulaire
     form.addEventListener('submit', function(e) {
         e.preventDefault();
