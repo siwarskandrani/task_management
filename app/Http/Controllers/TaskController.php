@@ -278,7 +278,9 @@ public function show(Task $task)
 
     $url = Storage::disk('public')->url($filePath);
 
-    return view('tasks.show', compact('task', 'url'));
+    $subTasks = $task->subtasks;
+
+    return view('tasks.show', compact('task', 'url','subTasks'));
 }
 
 

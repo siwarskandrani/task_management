@@ -49,6 +49,7 @@
                     @yield('calendar_task')
                     @yield('workload_content')
                     @yield('ByUser_content')
+                    @yield('show_tasks')
 
                 </div>
             </div>
