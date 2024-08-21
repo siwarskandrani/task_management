@@ -283,13 +283,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.delete-media').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('Delete button clicked'); // Debug log
-
             const mediaId = this.getAttribute('data-media-id');
             const taskId = this.getAttribute('data-task-id');
-
-            console.log('Media ID:', mediaId); // Debug log
-            console.log('Task ID:', taskId); // Debug log
 
             fetch(`/tasks/${taskId}/media/${mediaId}`, {
                 method: 'DELETE',
@@ -301,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    console.log('Media deleted successfully'); // Debug log
+                    //console.log('Media deleted successfully'); // Debug log
                     this.parentElement.remove(); // Remove media item from DOM
                 } else {
                     alert('Error deleting media');
@@ -355,11 +350,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Appel initial pour définir l'état correct au chargement
-    toggleAssigneeField();
 
-    // Ajoute un écouteur pour le changement de la sélection de l'équipe
+      // Fonction pour activer ou désactiver le champ "Parent Task"
+      function toggleParentTaskField() {
+        const typeSelect = document.getElementById('type');
+        const parentTaskSelect = document.getElementById('parent_task');
+        if (typeSelect.value === '1') {
+            parentTaskSelect.disabled = true;
+            parentTaskSelect.value = '';
+        } else {
+            parentTaskSelect.disabled = false;
+        }
+    }
+
     teamSelect.addEventListener('change', toggleAssigneeField);
+    document.getElementById('type').addEventListener('change', toggleParentTaskField);
+
+    toggleAssigneeField();
+    toggleParentTaskField();
 });
 
 </script>

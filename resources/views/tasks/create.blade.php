@@ -109,10 +109,10 @@
         <!-- Parent Task -->
         <div class="form-group mb-3">
             <label for="parent_task">Parent Task</label>
-            <select name="parent_task" id="parent_task" class="form-select">
+            <select name="parent_task" id="parent_task" class="form-select"> {{-- name doit etre la meme de validate dans la ftc store--}}
                 <option value="">None</option>
-                @foreach($parent_tasks as $task)
-                    <option value="{{ $task->id }}" {{ old('parent_task') == $task->id ? 'selected' : '' }}>
+                @foreach($parent_tasks as $task) {{--parent task fornit par create dans compact--}}
+                    <option value="{{ $task->id }}" {{ old('parent_task') == $task->id ? 'selected' : '' }}> {{-- le old il prend le meme varible fournie au name= --}}
                         {{ $task->title }}
                     </option>
                 @endforeach
@@ -174,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => console.error('Error fetching tags:', error));
         },
         onItemAdd: function(value, $item) {
-            // Vérifie si le tag est nouveau
             if (!$item.data('isNew')) return;
 
             fetch('{{ route('tags.store') }}', {
@@ -188,10 +187,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.tag) {
-                    // Met à jour l'élément avec la valeur correcte
                     $item.data('value', data.tag.id);
                     $item.removeData('isNew');
-                    // Ajoute le nouveau tag à la liste de sélection
                     tagsSelect[0].selectize.addOption({ id: data.tag.id, name: data.tag.name });
                     tagsSelect[0].selectize.addItem(data.tag.id);
                 } else {
@@ -207,6 +204,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const assigneeSelect = document.getElementById('assignee_id');
     const mediaInput = document.getElementById('media');
     const mediaContainer = document.getElementById('media-preview');
+    const typeSelect = document.getElementById('type');
+    const parentTaskSelect = document.getElementById('parent_task');
 
     // Fonction pour afficher les aperçus des médias
     function displayMediaPreviews(media) {
@@ -260,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 alert('Task created successfully');
                 displayMediaPreviews(data.media);
-                form.reset(); // Optionnel: Réinitialiser le formulaire après succès
+                form.reset();
             } else {
                 alert('Error creating task');
             }
@@ -270,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Fonction pour activer ou désactiver le champ "Assignee"
     function toggleAssigneeField() {
-        if (teamSelect.value === "") { // Si "None" est sélectionné
+        if (teamSelect.value === "") {
             assigneeSelect.disabled = true;
             assigneeSelect.innerHTML = '<option value="{{ auth()->id() }}">Self Assignee</option>';
         } else {
@@ -287,11 +286,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Fonction pour activer ou désactiver le champ "Parent Task"
+    function toggleParentTaskField() {
+        if (typeSelect.value === '1') { // Si "Main task" est sélectionné
+            parentTaskSelect.disabled = true;
+            parentTaskSelect.value = '';
+        } else {
+            parentTaskSelect.disabled = false;
+        }
+    }
+
     // Événement de changement pour le sélecteur d'équipe
     teamSelect.addEventListener('change', toggleAssigneeField);
+
+    // Événement de changement pour le sélecteur de type de tâche
+    typeSelect.addEventListener('change', toggleParentTaskField);
+
+    // Initialisation au chargement
+    toggleAssigneeField();
+    toggleParentTaskField();
 });
-
-
-
 </script>
 @endsection
+

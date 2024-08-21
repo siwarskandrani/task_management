@@ -38,7 +38,7 @@ class TaskController extends Controller
         })->get();
         
         // Récupérer toutes les tâches qui n'ont pas de parent_task
-        $parent_tasks = Task::whereNull('parent_task')->get();
+        $parent_tasks = Task::whereNull('parent_task')->where('owner', $userId)->get();
         
         return view('tasks.create', compact('projects', 'teams', 'parent_tasks'));
     }
@@ -55,7 +55,7 @@ class TaskController extends Controller
             'project_id' => 'required|nullable|exists:projects,id',
             'status' => 'required|integer|in:1,2,3',
             'type' => 'required|integer|in:1,2',
-            'parent_task_id' => 'nullable|exists:tasks,id',
+            'parent_task' => 'nullable|exists:tasks,id',
             'start_date' => 'nullable|date_format:Y-m-d\TH:i',
             'end_date' => 'nullable|date_format:Y-m-d\TH:i|after_or_equal:start_date',
             'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,bmp,doc,docx,ppt,pptx,xls,xlsx,pdf',
@@ -71,7 +71,7 @@ class TaskController extends Controller
             'project_id' => $request->input('project_id'),
             'status' => (int) $request->input('status'),
             'type' => $request->input('type'),
-            'parent_task_id' => $request->input('parent_task_id'),
+            'parent_task' => $request->input('parent_task'),
             'start_date' => $request->input('start_date'),
             'end_date' => $request->input('end_date'),
         ]);
@@ -129,7 +129,7 @@ class TaskController extends Controller
         })->get();
         
         // Récupérer toutes les tâches qui n'ont pas de parent_task
-        $parent_tasks = Task::whereNull('parent_task')->get();
+        $parent_tasks = Task::whereNull('parent_task')->where('owner', $userId)->get();
         
         $tags = Tag::all();
         
@@ -196,7 +196,7 @@ class TaskController extends Controller
                 'project_id' => 'required|nullable|exists:projects,id',
                 'status' => 'required|integer|in:1,2,3',
                 'type' => 'required|integer|in:1,2',
-                'parent_task_id' => 'nullable|exists:tasks,id',
+                'parent_task' => 'nullable|exists:tasks,id',
                 'end_date' => 'nullable|date_format:Y-m-d\TH:i|after_or_equal:start_date',
                 'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,bmp,doc,docx,ppt,pptx,xls,xlsx,pdf',
                 'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,bmp,doc,docx,ppt,pptx,xls,xlsx,pdf',
@@ -212,7 +212,7 @@ class TaskController extends Controller
                 'project_id' => $request->input('project_id'),
                 'status' => (int) $request->input('status'),
                 'type' => $request->input('type'),
-                'parent_task_id' => $request->input('parent_task_id'),
+                'parent_task' => $request->input('parent_task'),
                 'start_date' => $request->input('start_date'),
                 'end_date' => $request->input('end_date'),
             ]);
