@@ -15,15 +15,63 @@ use App\Notifications\TaskUpdatedNotification;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Pour que seul le propriétaire des tâches puisse voir la liste de ses tâches
-        $userId = auth()->id(); //userId c le user qui son session est ouverte
-        $tasks = Task::where('owner', $userId)->with('team')->get(); //en php: select * from table tasks where owner == userId n faisant un appel a la table teams appeleé par  la relation team (presente dans le model Task) car dans la formulaire ona besoin de team name : {{ $task->team->name }} 
+        $userId = auth()->id();
         
-        // Passer les tâches à la vue
-        return view('tasks.index', compact('tasks'));
+        // Get search query, status filter, and sorting parameter from the request
+        $searchQuery = $request->input('search'); //search houwa bidou name= fel formulaire==> le controleur va recuperer l name = search elli fel form
+        $statusFilter = $request->input('status', ''); // Default to no status filter
+        $sort = $request->input('sort', ''); // Default to no sorting
+        
+        // Map status values to their corresponding integers
+        $statusMap = [
+            'Not Started' => 1,
+            'In Progress' => 2,
+            'Completed' => 3,
+        ];
+        
+        // Start the query
+        $tasksQuery = Task::where('owner', $userId);
+        
+        // Apply search filter if present
+        if ($searchQuery) {
+            $tasksQuery->where(function($query) use ($searchQuery) {
+                $query->where('title', 'like', "%{$searchQuery}%")
+                      ->orWhere('description', 'like', "%{$searchQuery}%");
+            });
+        }
+        
+        // Apply status filter if present
+        if ($statusFilter) {
+            $statusValue = $statusMap[$statusFilter] ?? null;
+            if ($statusValue) {
+                $tasksQuery->where('status', $statusValue);
+            }
+        }
+        
+        // Apply sorting if present
+        switch ($sort) {
+            case 'start_date_desc':
+                $tasksQuery->orderBy('start_date', 'desc');
+                break;
+            case 'end_date_asc':
+                $tasksQuery->orderBy('end_date', 'asc');
+                break;
+            default:
+                break;
+        }
+        
+        // Fetch tasks with related team data
+        $tasks = $tasksQuery->with('team')->paginate(5);
+        
+        // Pass data to view
+        return view('tasks.index', compact('tasks', 'searchQuery', 'statusFilter', 'sort'));
     }
+    
+
+    
+    
     public function create()
     {
         $userId = auth()->id();
