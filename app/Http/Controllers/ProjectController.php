@@ -15,8 +15,11 @@ class ProjectController extends Controller
        
     //pour que seul le propriétaire de projet peut voir la lise de ses projests
     $userId = auth()->id();
-    $projects = Project::where('owner', $userId)->get();
-    
+
+    $projects = Project::with('tasks') //on a fait un appel a la relation tasks qui est dans l model project
+    ->where('owner', $userId)
+    ->get();    
+
     // Passer les projets à la vue
     return view('projects.index', compact('projects'));
     }

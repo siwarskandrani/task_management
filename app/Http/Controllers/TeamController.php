@@ -25,6 +25,7 @@ class TeamController extends Controller
      */
     public function create()
     {
+
         return view('teams.create');
     }
 
@@ -33,51 +34,67 @@ class TeamController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([  // Lorsque l'utilisateur soumet un formulaire sur la page de création (générée par la méthode create), les données du formulaire sont envoyées au serveur via une requête POST.Laravel capture cette requête et la rend disponible via l'objet Request
-        'name' => 'required',
-        'description' => 'required',
-        'emails_member' => 'nullable|string',
+        $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+            'emails_member' => 'nullable|string',
         ]);
-        //Récupération de toutes les données de la requête :
-        $input = $request->only(['name', 'description']); //les attributs elli 3amarnehom fel create lkol bch n7otouhom d variable input
-         //Création du produit :
-         $team = Team::create($input); //create est une méthode fournie par Laravel pour insérer une nouvelle entrée dans la base de données en utilisant le modèle Eloquent==> c pas la méthode create qu'on a créé au dessus
-          // Ajout de l'utilisateur créateur à la table pivot avec le rôle 'admin'
-        $user = auth()->user();  //$user c t'utilisateur connecté
-        $user->teams()->attach($team->id, ['role' => 'admin']); // Ajout à la table pivot user__teams. ici on a associe l'équipe nouvellement créée à cet utilisateur en utilisant la méthode attach sur la relation teams. on a fait une attach entre le user cnnecté et le team donc entre le model user et team .teams()ici c la methode l mawjoida f table user .houwa wahdou wahdou mchee 3raf elli hiya mawjouda f table user khtr parce que $user est une instance de modèle User.
-
-          // Traitement des e-mails des membres
-      // On découpe la chaîne de caractères en un tableau d'emails
-         $emails = array_map('trim', explode(',', $request->input('emails_member', '')));
     
-         foreach ($emails as $email) {
+        // Récupération des données du formulaire
+        $input = $request->only(['name', 'description']);
+        $team = Team::create($input);
+    
+        // Ajout de l'utilisateur créateur à l'équipe
+        $user = auth()->user();
+        $user->teams()->attach($team->id, ['role' => 'admin']);
+    
+        // Traitement des e-mails des membres
+        $emails = array_map('trim', explode(',', $request->input('emails_member', '')));
+        $invalidEmails = [];
+    
+        foreach ($emails as $email) {
             if (!empty($email)) {
                 $user = User::where('email', $email)->first();
                 if ($user) {
-                    // Add existing user to the team
+                    // Ajouter les utilisateurs existants à l'équipe
                     $team->users()->attach($user->id, ['role' => 'member']);
-                    // Send invitation email
-                    Mail::to($user->email)->send(new TeamInvitation($team));
+                    // Envoyer un e-mail d'invitation
+                     // Mail::to($user->email)->send(new TeamInvitation($team));
                 } else {
-                    // Generate registration link
+                    // Utilisateurs non enregistrés, envoyez un e-mail d'invitation
                     $invitationLink = route('register', ['email' => $email, 'team_id' => $team->id]);
-                    // Send invitation email with registration link
-                    Mail::to($email)->send(new TeamInvitation($team, $invitationLink));
+                   // Mail::to($email)->send(new TeamInvitation($team, $invitationLink));
+                   $invalidEmails[] = $email;
                 }
             }
         }
-        
-    // Redirection avec message de succès
-    return redirect()->route('dashboard')->with('success', 'New team added successfully');
-}
+    
+        // Message d'alerte pour les e-mails non valides
+        $message = 'L\'équipe a été créée avec succès.';
+        if (!empty($invalidEmails)) {
+            $message .= ' Les e-mails suivants n\'ont pas de compte enregistré et ont reçu une invitation pour s\'inscrire : ' . implode(', ', $invalidEmails) . '.';
+        }
+        //dd($message);
+
+        // Redirection avec message de succès
+        return redirect()->route('teams.index')->with('success', $message);
+    }
+    
+    
 
     /**
      * Display the specified resource.
      */
     public function show(Team $team)
     {
-        //
+        $user = auth()->user();
+        // Récupère tous les membres sauf l'admin
+        $members = $team->users()->where('users.id', '!=', $user->id)->get();
+        
+        return view('teams.show', compact('team', 'members'));
     }
+    
+    
 
     /**
      * Show the form for editing the specified resource.
@@ -85,7 +102,7 @@ class TeamController extends Controller
     public function edit(Team $team)
     {
         $user = auth()->user();
-    
+        $allUsers = User::all(); 
         // Vérifie si l'utilisateur est un admin 
         if ($user->teams()->wherePivot('ID_team', $team->id)->wherePivot('role', 'admin')->exists()) {
             // L'utilisateur est un admin ==> affiche formulaire:
@@ -94,7 +111,7 @@ class TeamController extends Controller
          $members = $team->users()->wherePivot('role', 'member')->get();
 
 
-        return view('teams.edit', compact('team','members'));
+        return view('teams.edit', compact('team','members','allUsers'));
         } else {
             // L'user n'est pas un admin==>pas accès
             return redirect()->route('teams.index')->with('error', 'You do not have permission to edit this team');
@@ -102,56 +119,67 @@ class TeamController extends Controller
     }
    
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Team $team)
-    {
-        // Valider les données de la requête
-        $request->validate([
-            'name' => 'required',
-            'description' => 'required',
-            'emails_member' => 'nullable|string',
-        ]);
-    
-        // Mettre à jour les informations de l'équipe
-        $team->update([
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-        ]);
-    
-        // Traitement des e-mails des membres
-        $emails = array_map('trim', explode(',', $request->input('emails_member', '')));
-    
-        // Obtenir les IDs des membres actuels
-        $currentMemberIds = $team->users->pluck('id')->toArray();
-    
-        // Obtenir les id des new membres
-        $newMemberIds = [];
-        foreach ($emails as $email) {
-            $user = User::where('email', $email)->first();
-            if ($user) {
-                $newMemberIds[] = $user->id;
-            }
+   /**
+ * Update the specified resource in storage.
+ */
+public function update(Request $request, Team $team)
+{
+    // Valider les données de la requête
+    $request->validate([
+        'name' => 'required',
+        'description' => 'required',
+        'emails_member' => 'nullable|string',
+    ]);
+
+    // Mettre à jour les informations de l'équipe
+    $team->update([
+        'name' => $request->input('name'),
+        'description' => $request->input('description'),
+    ]);
+
+    // Traitement des e-mails des membres
+    $emails = array_map('trim', explode(',', $request->input('emails_member', '')));
+    $invalidEmails = [];
+
+    // Obtenir les IDs des membres actuels
+    $currentMemberIds = $team->users->pluck('id')->toArray();
+
+    // Obtenir les IDs des nouveaux membres
+    $newMemberIds = [];
+    foreach ($emails as $email) {
+        // Valider l'email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $invalidEmails[] = $email;
+            continue;
         }
-    
-        // Ajouter les nouveaux membres
-        foreach ($newMemberIds as $userId) {
-            if (!in_array($userId, $currentMemberIds)) {
-                $team->users()->attach($userId, ['role' => 'member']);
+
+        $user = User::where('email', $email)->first();
+        if ($user) {
+            $newMemberIds[] = $user->id;
+            if (!in_array($user->id, $currentMemberIds)) {
+                // Ajouter les nouveaux membres qui ne sont pas déjà dans l'équipe
+                $team->users()->attach($user->id, ['role' => 'member']);
+                // Envoyer un e-mail d'invitation
+                // Mail::to($user->email)->send(new TeamInvitation($team));
             }
+        } else {
+            // Utilisateurs non enregistrés, envoyez un e-mail d'invitation
+            $invitationLink = route('register', ['email' => $email, 'team_id' => $team->id]);
+            // Mail::to($email)->send(new TeamInvitation($team, $invitationLink));
+            $invalidEmails[] = $email;
         }
-    
-        // Supprimer les membres qui ne sont plus dans la liste
-        foreach ($currentMemberIds as $userId) {
-            if (!in_array($userId, $newMemberIds)) {
-                $team->users()->detach($userId);
-            }
-        }
-    
-        // Rediriger avec un message de succès
-        return redirect()->route('teams.index')->with('success', 'Team updated successfully');
     }
+
+    // Message d'alerte pour les e-mails non valides
+    $message = 'L\'équipe a été mise à jour avec succès.';
+    if (!empty($invalidEmails)) {
+        $message .= ' Les e-mails suivants n\'ont pas de compte enregistré et ont reçu une invitation pour s\'inscrire : ' . implode(', ', $invalidEmails) . '.';
+    }
+
+    // Rediriger avec un message de succès
+    return redirect()->route('teams.index')->with('success', $message);
+}
+
     
     /**
      * Remove the specified resource from storage.
@@ -180,7 +208,35 @@ class TeamController extends Controller
         return response()->json(['members' => $members]);
     }
     
-    
-    
+    public function removeMember(Team $team, User $user)
+{
+    // Vérifie que l'utilisateur fait partie de l'équipe
+    if ($team->users()->where('user_id', $user->id)->exists()) {
+        // Supprime l'utilisateur de l'équipe
+        $team->users()->detach($user->id);
+
+        return response()->json(['success' => true]);
+    }
+
+    return response()->json(['success' => false, 'message' => 'User not found in team'], 404);
+}
+
+public function destroyMember($teamId, $memberId)
+{
+    $team = Team::findOrFail($teamId);
+    $user = auth()->user();
+
+    if (!$user->teams()->wherePivot('ID_team', $teamId)->wherePivot('role', 'admin')->exists()) {
+        return redirect()->route('teams.show', $teamId)->with('error', 'Unauthorized action.');
+    }
+
+    // Trouver et supprimer le membre
+    $team->users()->detach($memberId);
+
+    return redirect()->route('teams.show', $teamId)->with('success', 'Member removed successfully.');
+}
+
+
+
 
 }

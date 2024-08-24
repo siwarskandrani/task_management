@@ -9,7 +9,12 @@
         </div>
     </div>
     <br>
-
+ {{-- Affichage du message de succès --}}
+ @if (session('success'))
+ <div class="alert alert-success">
+     {{ session('success') }}
+ </div>
+@endif
     @if ($errors->any())
     <div class="alert alert-danger" role="alert">
         <ul>
@@ -44,20 +49,50 @@
                 >{{ old('description', $team->description) }}</textarea>
             </div>
 
-            <div class="mb-3">
-                <label for="emails_member" class="form-label">Update Members (emails separated by commas)</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="emails_member"
-                    id="emails_member"
-                    value="{{ old('emails_member', implode(',', $members->pluck('email')->toArray())) }}"
-                />
-                <small class="form-text text-muted">Enter multiple emails separated by commas.</small>
+            <div class="form-group mb-3">
+                <label for="emails_member">Update Members (emails)</label>
+                <select id="emails_member" name="emails_member" multiple class="form-select">
+                    @foreach($members as $member)
+                        <option value="{{ $member->email }}" {{ in_array($member->email, old('emails_member', $members->pluck('email')->toArray())) ? 'selected' : '' }}>
+                            {{ $member->email }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('emails_member')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
             </div>
-
+            
+            
             <button type="submit" class="btn btn-success">Update</button>
         </form>
     </div>
 </div>
+@endsection
+@section('scripts')
+<script>
+$(document).ready(function() {
+    $('#emails_member').selectize({
+        plugins: ['remove_button'],
+        delimiter: ',',
+        persist: false,
+        create: function(input) {
+            // Vérifier si l'email est valide
+            if (validateEmail(input)) {
+                return { value: input, text: input };
+            } else {
+                alert('Veuillez entrer une adresse e-mail valide.');
+                return false;
+            }
+        },
+    });
+
+    // Fonction pour valider une adresse e-mail
+    function validateEmail(email) {
+        var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+});
+
+</script>
 @endsection

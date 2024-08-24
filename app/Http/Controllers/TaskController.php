@@ -301,7 +301,7 @@ class TaskController extends Controller
         $task->tags()->sync($tags);
     } else {
         // Si aucun tag n'est fourni, détacher tous les tags associés
-        $task->tags()->detach(); // Cela retire tous les tags associés à la tâche
+        $task->tags()->detach(); //  retire tous les tags associés à la tâche
     }
 
     

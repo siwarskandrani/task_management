@@ -48,6 +48,8 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
    Route::get('/tags', [TagController::class, 'search']);
    Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
+   Route::delete('/teams/{teamId}/members/{memberId}', [TeamController::class, 'destroyMember'])->name('teams.destroyMember');
+
 
 });
 

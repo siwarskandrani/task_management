@@ -15,13 +15,12 @@ class TagController extends Controller
 
         $tag = Tag::create([
             'name' => $request->input('name'),
-         //   'user_id' => auth()->id(),// Optional, if  you want to link tags to users
+         //   'user_id' => auth()->id(),
         ]);
 
         return response()->json(['tag' => $tag]);
     }
 
-    // Dans TagController.php
     public function search(Request $request)
     {
         $query = $request->input('query');

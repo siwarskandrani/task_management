@@ -9,27 +9,36 @@
         </div>
     </div>
     <br>
-    
-    @if ($errors->any())
-    <div class="alert alert-danger" role="alert">
-        <ul>
-            @foreach ($errors->all() as $item)
-            <li>{{ $item }}</li>
-            @endforeach
-        </ul>
-    </div>
+
+    {{-- Affichage du message de succès --}}
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
     @endif
-    
+
+    {{-- Affichage des erreurs --}}
+    @if ($errors->any())
+        <div class="alert alert-danger" role="alert">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="container p-5">
-        <form action="{{ route('teams.store') }}" method="post" enctype="multipart/form-data">
+        <form action="{{ route('teams.store') }}" method="post">
             @csrf
             <div class="mb-3">
                 <label for="name" class="form-label">Name</label>
                 <input
                     type="text"
                     class="form-control"
-                    name="name" {{-- Correspond au 'name' dans la validation du contrôleur --}}
+                    name="name"
                     id="name"
+                    value="{{ old('name') }}" 
                 />
             </div>
             <div class="mb-3">
@@ -39,24 +48,52 @@
                     id="description"
                     class="form-control"
                     rows="3"
-                ></textarea>
+                >{{ old('description') }}</textarea>
             </div>
-            <div class="mb-3">
-                <label for="emails_member" class="form-label">Invite Members (emails separated by commas)</label>
+
+            <div class="form-group mb-3">
+                <label for="emails_member">Invite Members</label>
                 <input
                     type="text"
-                    class="form-control"
                     name="emails_member"
                     id="emails_member"
-                    placeholder="example@example.com, another@example.com"
-
+                    value="{{ old('emails_member') }}" 
                 />
-                <small class="form-text text-muted">Enter multiple emails separated by commas.</small>
+                @error('emails_member')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
             </div>
-        
         
             <button type="submit" class="btn btn-success">Submit</button>
         </form>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+$(document).ready(function() {
+
+    $('#emails_member').selectize({
+        plugins: ['remove_button'],
+        delimiter: ',',
+        persist: false,
+        create: function(input) {
+            // Vérifier si l'email est valide
+            if (validateEmail(input)) {
+                return { value: input, text: input };
+            } else {
+                alert('Veuillez entrer une adresse e-mail valide.');
+                return false;
+            }
+        },
+    });
+
+    // Fonction pour valider une adresse e-mail
+    function validateEmail(email) {
+        var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+});
+</script>
 @endsection
