@@ -87,7 +87,7 @@
                             <p class="mb-1"><strong>Team:</strong> {{ $task->team->name ?? 'N/A' }}</p>
                         </div>
                         <div class="mb-3">
-                            <p class="badge {{ $task->status == 'Completed' ? 'bg-success' : 'bg-warning' }} p-2" style="border-radius: 10px; font-size: 0.8rem;">
+                            <p class="badge {{ $task->status == '3' ? 'bg-success' : 'bg-warning' }} p-2" style="border-radius: 10px; font-size: 0.8rem;">
                                 {{ $task->status_label }}
                             </p>
                         </div>

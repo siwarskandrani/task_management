@@ -16,5 +16,7 @@ class NotificationController extends Controller
         Auth::user()->unreadNotifications->markAsRead();
 
         return view('notifications.index', compact('notifications'));
+           // return redirect()->route('dashboard'); 
+
     }
 }

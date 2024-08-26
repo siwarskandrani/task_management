@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Media;
 use App\Models\Tag;
 use App\Notifications\TaskUpdatedNotification;
+use App\Notifications\TaskDeletedNotification;
 
 class TaskController extends Controller
 {
@@ -32,7 +33,7 @@ class TaskController extends Controller
         ];
         
         // Start the query
-        $tasksQuery = Task::where('owner', $userId);
+        $tasksQuery = Task::where('owner', $userId)->whereNull('parent_task'); //whereNull pour inclure seulemnt les main task
         
         // Apply search filter if present
         if ($searchQuery) {
@@ -75,6 +76,9 @@ class TaskController extends Controller
     public function create()
     {
         $userId = auth()->id();
+
+        $defaultStartDate = now()->format('Y-m-d\TH:i');
+        $defaultEndDate = now()->addMinutes(5)->format('Y-m-d\TH:i');
         
         // Récupérer les projets appartenant à l'utilisateur connecté
         $projects = Project::where('owner', $userId)->get(); 
@@ -84,17 +88,24 @@ class TaskController extends Controller
             $query->where('user__teams.ID_user', $userId)
                   ->where('user__teams.role', 'admin'); 
         })->get();
-        
+
         // Récupérer toutes les tâches qui n'ont pas de parent_task
         $parent_tasks = Task::whereNull('parent_task')->where('owner', $userId)->get();
+
+     
         
-        return view('tasks.create', compact('projects', 'teams', 'parent_tasks'));
+        return view('tasks.create', compact('projects', 'teams', 'parent_tasks','defaultStartDate', 'defaultEndDate'));
     }
     
     
     
     public function store(Request $request)
     {
+        $defaultStartDate = now()->format('Y-m-d\TH:i');
+        $defaultEndDate = now()->addMinutes(5)->format('Y-m-d\TH:i');
+
+       
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -104,12 +115,15 @@ class TaskController extends Controller
             'status' => 'required|integer|in:1,2,3',
             'type' => 'required|integer|in:1,2',
             'parent_task' => 'nullable|exists:tasks,id',
-            'start_date' => 'nullable|date_format:Y-m-d\TH:i',
-            'end_date' => 'nullable|date_format:Y-m-d\TH:i|after_or_equal:start_date',
+            'start_date' => 'required|date_format:Y-m-d\TH:i',
+            'end_date' => 'required|date_format:Y-m-d\TH:i|after_or_equal:start_date',
             'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,bmp,doc,docx,ppt,pptx,xls,xlsx,pdf',
-            'tags.*' => 'required',
+            'tags.*' => 'string',
         ]);
-    
+
+        $startDate = $request->input('start_date', $defaultStartDate);
+         $endDate = $request->input('end_date', $defaultEndDate);
+        
         // Création de la tâche
         $task = Task::create([
             'title' => $request->input('title'),
@@ -124,6 +138,7 @@ class TaskController extends Controller
             'end_date' => $request->input('end_date'),
         ]);
         
+      
        // Gestion des fichiers média
         if ($request->hasFile('media')) {
             foreach ($request->file('media') as $file) {
@@ -181,6 +196,9 @@ class TaskController extends Controller
         
         $tags = Tag::all();
         
+          // Vérifier si l'utilisateur est le propriétaire de la tâche
+    $isOwner = $task->owner == $userId;
+
       //  $task->load('team', 'owner');
      //  dd($task);
      
@@ -194,6 +212,13 @@ class TaskController extends Controller
               ->where('user__teams.ID_user', $userId)
               ->exists();
       }
+
+      // Si l'utilisateur n'est ni le propriétaire ni un admin, rediriger avec un message d'erreur
+      //Pour la page by_user
+    if (!$isOwner && !$isAdmin) {
+        return back()->with('error', 'Vous n\'êtes pas autorisé à modifier cette tâche.');
+    }
+
       $isEditable = !$task->team_id || $isAdmin; // Champs ouverts si team_id est nul ou utilisateur est admin
    // dump($isEditable);
       if (!$isEditable) {
@@ -245,8 +270,8 @@ class TaskController extends Controller
                 'status' => 'required|integer|in:1,2,3',
                 'type' => 'required|integer|in:1,2',
                 'parent_task' => 'nullable|exists:tasks,id',
-                'end_date' => 'nullable|date_format:Y-m-d\TH:i|after_or_equal:start_date',
-                'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,bmp,doc,docx,ppt,pptx,xls,xlsx,pdf',
+                'start_date' => 'required|date_format:Y-m-d\TH:i',
+                'end_date' => 'required|date_format:Y-m-d\TH:i|after_or_equal:start_date',                'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,bmp,doc,docx,ppt,pptx,xls,xlsx,pdf',
                 'media.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,bmp,doc,docx,ppt,pptx,xls,xlsx,pdf',
                 'tags.*' => 'required',
             ]);
@@ -342,6 +367,10 @@ public function destroy(Request $request, Task $task)
     $userId = auth()->id();
     $isAdmin = false;
 
+
+    $team = $task->team;
+   // $assignee = $task->owner;
+
     // Vérifiez si la tâche est associée à une équipe
     if ($task->team_id && $task->team) {
         // Vérifiez si l'utilisateur est un administrateur de l'équipe associée à la tâche
@@ -354,6 +383,7 @@ public function destroy(Request $request, Task $task)
     // Déterminez si la tâche est supprimable
     $isDeletable = $isAdmin || !$task->team_id;
 
+
     // Si l'utilisateur n'est pas autorisé à supprimer la tâche
     if (!$isDeletable) {
         return redirect()->back()->with('error', 'You do not have permission to delete this task.');
@@ -361,7 +391,11 @@ public function destroy(Request $request, Task $task)
 
     // Suppression de la tâche
     $task->delete();
-
+    //dd($assignee);
+    //notif
+    foreach ($team->users as $user) {
+        $user->notify(new TaskDeletedNotification($task));
+    }
     // Rediriger vers l'URL précédente
     return redirect()->to(url()->previous())->with('success', 'Task deleted successfully'); //prevouis pour q'uil me redirige vers l'url quiest deja ouvert
 }
@@ -437,7 +471,11 @@ public function showTasksByUser($id, $team_id)
     return view('tasks.by_user', compact('user', 'tasks'));
 }
 
-
+public function getParentProject(Task $task)
+{
+    $projectId = $task->project_id; // Assurez-vous que le champ `project_id` est bien présent dans la tâche parente
+    return response()->json(['projectId' => $projectId]);
+}
 
 
     }

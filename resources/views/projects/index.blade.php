@@ -2,13 +2,13 @@
 
 @section('index_project')
 <div class="container p-5">
-    <br>
-    <div class="row">
-        <div class="col align-self-start">
-            <a class="btn btn-primary" href="{{ route('projects.create') }}">Create Project</a>
+    <div class="row mb-4">
+        <div class="col-auto">
+            <a class="btn btn-primary" href="{{ route('projects.create') }}">
+                <i class="bi bi-plus"></i> Create Project
+            </a>
         </div>
     </div>
-    <br>
 
     @if ($message = Session::get('success')) 
     <div class="alert alert-success" role="alert">
@@ -22,42 +22,43 @@
     </div>
     @endif
 
-    <div class="table-responsive">
-        <table class="table table-striped table-hover table-borderless table-primary align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Tasks</th> <!-- Nouvelle colonne pour les tâches -->
-                    <th width='300px'>Actions</th>
-                </tr>
-            </thead>
-            <tbody class="table-group-divider">
-                @foreach ($projects as $project)
-                <tr class="table-primary">
-                    <td>{{ $project->name }}</td>
-                    <td>{{ $project->description }}</td>
-                    <td>
-                        <ul class="list-unstyled">
-                            @forelse ($project->tasks as $task)
-                                <li>{{ $task->title }}</li>
-                            @empty
-                                <li>No tasks assigned</li>
-                            @endforelse
-                        </ul>
-                    </td>
-                    <td>
-                        <form action="{{ route('projects.destroy', $project->id) }}" method="post" style="display: inline-block;">
+    <div class="row">
+        @foreach ($projects as $project)
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ $project->name }}</h5>
+                    <p class="card-text">{{ Str::limit($project->description, 100, '...') }}</p>
+                    <h6 class="card-subtitle mb-2 text-muted">Tasks:</h6>
+                    @forelse ($project->tasks as $task)
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span>{{ $task->title }}</span>
+                                <small class="text-muted d-block">Assigned to: {{ $task->owner ? $task->owner->name : 'Unassigned' }}</small>
+                            </div>
+                            <a class="text-info" href="{{ route('tasks.show', $task->id) }}">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    @empty
+                        <p class="text-muted">No tasks assigned</p>
+                    @endforelse
+                    <div class="mt-3">
+                        <a class="text-primary me-2" href="{{ route('projects.edit', $project->id) }}">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form action="{{ route('projects.destroy', $project->id) }}" method="post" style="display: inline;">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Delete</button>
+                            <button type="submit" class="btn btn-link text-danger p-0" style="font-size: 1.2rem;">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </form>
-                        <a class="btn btn-primary" href="{{ route('projects.edit', $project->id) }}">Edit</a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endforeach
     </div>
 </div>
 @endsection

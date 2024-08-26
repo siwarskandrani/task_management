@@ -49,9 +49,10 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
    Route::get('/tags', [TagController::class, 'search']);
    Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
    Route::delete('/teams/{teamId}/members/{memberId}', [TeamController::class, 'destroyMember'])->name('teams.destroyMember');
-
+   Route::get('/tasks/{task}/project', [TaskController::class, 'getParentProject'])->name('tasks.parent.project');
 
 });
+
 
 // Routes pour l'authentification sociale
 Route::get('auth/{driver}/redirect', [SocialLoginController::class, 'redirectToProvider'])->where('driver', 'google|facebook');
