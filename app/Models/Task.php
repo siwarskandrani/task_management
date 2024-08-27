@@ -20,9 +20,9 @@ class Task extends Model
         return $this->belongsTo(Project::class);
     }
 
-    public function owner()
+    public function assignee()
     {
-        return $this->belongsTo(User::class /*',owner'*/); 
+        return $this->belongsTo(User::class ,'owner'); 
     }
 
     public function tags()

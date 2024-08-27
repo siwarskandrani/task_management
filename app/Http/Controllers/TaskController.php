@@ -393,9 +393,9 @@ public function destroy(Request $request, Task $task)
     $task->delete();
     //dd($assignee);
     //notif
-    foreach ($team->users as $user) {
-        $user->notify(new TaskDeletedNotification($task));
-    }
+    // foreach ($team->users as $user) {
+    //     $user->notify(new TaskDeletedNotification($task));
+    // }
     // Rediriger vers l'URL précédente
     return redirect()->to(url()->previous())->with('success', 'Task deleted successfully'); //prevouis pour q'uil me redirige vers l'url quiest deja ouvert
 }

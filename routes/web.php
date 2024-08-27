@@ -10,6 +10,7 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\InvitationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +51,10 @@ Route::middleware('auth')->group(function () { //ici on créé les routes qui so
    Route::post('/tags', [TagController::class, 'store'])->name('tags.store');
    Route::delete('/teams/{teamId}/members/{memberId}', [TeamController::class, 'destroyMember'])->name('teams.destroyMember');
    Route::get('/tasks/{task}/project', [TaskController::class, 'getParentProject'])->name('tasks.parent.project');
+   Route::get('/invitations', [InvitationController::class, 'index'])->name('invitations.index');
+   Route::get('/teams/accept/{invitation}', [TeamController::class, 'acceptInvitation'])->name('teams.accept_invitation');
+   Route::get('/teams/reject/{invitation}', [TeamController::class, 'rejectInvitation'])->name('teams.reject_invitation');
+   
 
 });
 

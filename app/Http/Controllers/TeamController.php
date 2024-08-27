@@ -12,20 +12,36 @@ class TeamController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-    $user = auth()->user(); //user c'est l'utilisateur connecté
-    $teams = $user->teams; // Récupère toutes les équipes associées à l'utilisateur
-    
-    return view('teams.index', compact('teams')); // Passe l teams à la vue. teams hedhi hiya bidha $teams
+    public function index(Request $request)
+{
+    $user = auth()->user();
+
+    $search = $request->query('search');
+    $role = $request->query('role');
+
+    // construction requête
+    $teamsQuery = $user->teams();
+
+    // Application des filtres
+    if ($search) {
+        $teamsQuery->where('name', 'like', '%' . $search . '%');
     }
+
+    if ($role) {
+        $teamsQuery->wherePivot('role', $role);
+    }
+
+    // Pagination
+    $teams = $teamsQuery->paginate(8);
+
+    return view('teams.index', compact('teams'));
+}
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-
         return view('teams.create');
     }
 

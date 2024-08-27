@@ -65,9 +65,9 @@
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
-        
-        <!-- Type -->
-        <div class="form-group mb-4">
+
+          <!-- Type -->
+          <div class="form-group mb-4">
             <label for="type" class="form-label">Type</label>
             <select name="type" id="type" class="form-select" required>
                 <option value="1" {{ old('type') == '1' ? 'selected' : '' }}>Main task</option>
@@ -78,30 +78,39 @@
             @enderror
         </div>
 
-        <!-- Parent Task -->
-        <div class="form-group mb-4">
-            <label for="parent_task" class="form-label">Parent Task</label>
-            <select name="parent_task" id="parent_task" class="form-select">
-                <option value="">None</option>
-                @foreach ($parent_tasks as $parentTask)
-                    <option value="{{ $parentTask->id }}" {{ $parentTask->id == old('parent_task') ? 'selected' : '' }}>
-                        {{ $parentTask->title }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-    <!--Project -->
-        <div class="form-group mb-4">
-            <label for="project_id" class="form-label">Project</label>
-            <select name="project_id" id="project_id" class="form-select">
-                @foreach ($projects as $project)
-                    <option value="{{ $project->id }}" {{ $project->id == old('project_id') ? 'selected' : '' }}>
-                        {{ $project->name }}
-                    </option>
-                @endforeach
-            </select>
-            <input type="hidden" id="hidden_project_id" name="project_id" value="">
-        </div>
+       <!-- Parent Task -->
+       <div class="form-group mb-4">
+        <label for="parent_task" class="form-label">Parent Task</label>
+        <select name="parent_task" id="parent_task" class="form-select" {{ old('type') == '1' ? 'disabled' : '' }}>
+            <option value="">None</option>
+            @foreach($parent_tasks as $task)
+                <option value="{{ $task->id }}" data-project="{{ $task->project_id }}" {{ old('parent_task') == $task->id ? 'selected' : '' }}>
+                    {{ $task->title }}
+                </option>
+            @endforeach
+        </select>
+        @error('parent_task')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <!-- Project -->
+    <div class="form-group mb-4">
+        <label for="project_id" class="form-label">Project</label>
+        <select name="project_id" id="project_id" class="form-select">
+            <option value="">None</option>
+            @foreach($projects as $project)
+                <option value="{{ $project->id }}" 
+                    {{ old('project_id') == $project->id ? 'selected' : '' }}>
+                    {{ $project->name }}
+                </option>
+            @endforeach
+        </select>
+        @error('project_id')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
+    </div>
+
 
 
         <!-- Status -->
@@ -121,7 +130,7 @@
             </select>
         </div>
 
-    
+      
 
         <!-- Dates -->
         <div class="form-group mb-4">
@@ -140,8 +149,8 @@
             @enderror
         </div>
 
-                <!-- Media -->
-        <div class="form-group mb-4">
+        <!-- Media -->
+          <div class="form-group mb-4">
             <label for="media" class="form-label">Add Media</label>
             <input type="file" name="media[]" id="media" class="form-control" multiple>
             <div id="media-names" class="mt-2"></div> <!-- Conteneur pour les noms des fichiers -->
@@ -149,7 +158,6 @@
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
-
 
         <button type="submit" class="btn btn-primary w-100">Submit</button>
     </form>
@@ -166,10 +174,84 @@ document.addEventListener('DOMContentLoaded', function() {
     const mediaInput = document.getElementById('media');
     const typeSelect = document.getElementById('type');
     const parentTaskSelect = document.getElementById('parent_task');
-    const mediaNamesContainer = document.getElementById('media-names');
     const projectSelect = document.getElementById('project_id');
-    const hiddenProjectInput = document.getElementById('hidden_project_id');
-    
+    const mediaNamesContainer = document.getElementById('media-names');
+
+    // Fonction pour afficher les aperçus des médias
+    function displayMediaNames(files) {
+        mediaNamesContainer.innerHTML = ''; // Vider le conteneur
+        files.forEach(file => {
+            const fileName = document.createElement('div');
+            fileName.textContent = file.name;
+            mediaNamesContainer.appendChild(fileName);
+        });
+    }
+  
+    mediaInput.addEventListener('change', (event) => {
+        const files = Array.from(event.target.files);
+        displayMediaNames(files);
+    });
+
+    // Fonction pour mettre à jour les membres de l'équipe assignés
+    async function updateAssignees(teamId) {
+        assigneeSelect.disabled = true;
+        assigneeSelect.innerHTML = ''; // Effacer les options précédentes
+
+        try {
+            const response = await fetch(`/teams/${teamId}/members`);
+            const data = await response.json();
+
+            if (data.members.length > 0) {
+                data.members.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.id;
+                    option.textContent = member.name;
+                    assigneeSelect.appendChild(option);
+                });
+                assigneeSelect.disabled = false;
+            } else {
+                // Si aucun membre n'est disponible, vous pouvez afficher un message ou gérer cette situation
+                assigneeSelect.innerHTML = '<option value="">No members available</option>';
+            }
+        } catch (error) {
+            console.error('Error fetching assignees:', error);
+        }
+    }
+
+    // Mettre à jour les membres lors du changement de l'équipe
+    teamSelect.addEventListener('change', (event) => {
+        const teamId = event.target.value;
+        if (teamId) {
+            updateAssignees(teamId);
+        } else {
+            assigneeSelect.disabled = true;
+            assigneeSelect.innerHTML = '<option value="">Select an assignee</option>';
+        }
+    });
+
+    // Activer/désactiver le champ "Parent Task" en fonction de la sélection du type de tâche
+    function toggleParentTaskField() {
+        const isMainTask = typeSelect.value == '1';
+        parentTaskSelect.disabled = isMainTask;
+    }
+
+    typeSelect.addEventListener('change', () => {
+        toggleParentTaskField();
+    });
+
+    // Quand une tâche parente est sélectionnée
+    parentTaskSelect.addEventListener('change', function() {
+        const selectedOption = parentTaskSelect.options[parentTaskSelect.selectedIndex];
+        const projectId = selectedOption.getAttribute('data-project');
+
+        if (projectId) {
+            projectSelect.value = projectId; // Mettre à jour le projet automatiquement
+        }
+    });
+
+    // Vérifier et ajuster l'état du champ "Parent Task" au chargement initial de la page
+    toggleParentTaskField();
+
     // Initialisation de Selectize pour les tags
     tagsSelect.selectize({
         plugins: ['remove_button'],
@@ -210,103 +292,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error creating tag:', error));
         }
     });
-
-    // Fonction pour afficher les aperçus des médias
-    function displayMediaNames(files) {
-        mediaNamesContainer.innerHTML = ''; // Vider le conteneur
-        files.forEach(file => {
-            const fileName = document.createElement('div');
-            fileName.textContent = file.name;
-            mediaNamesContainer.appendChild(fileName);
-        });
-    }
-  // Mettre à jour les noms lors de la sélection des fichiers
-  mediaInput.addEventListener('change', (event) => {
-        const files = Array.from(event.target.files);
-        displayMediaNames(files);
-    });
-
-    // Fonction pour mettre à jour les membres de l'équipe assignés
-    async function updateAssignees(teamId) {
-        assigneeSelect.disabled = true;
-        assigneeSelect.innerHTML = '<option value="">Loading...</option>';
-
-        try {
-            const response = await fetch(`/teams/${teamId}/members`);
-            const data = await response.json();
-
-            // Si l'équipe est sélectionnée, on affiche uniquement les membres de l'équipe
-            assigneeSelect.innerHTML = ''; // Clear existing options
-            data.members.forEach(member => {
-                const option = document.createElement('option');
-                option.value = member.id;
-                option.textContent = member.name;
-                assigneeSelect.appendChild(option);
-            });
-            assigneeSelect.disabled = false;
-        } catch (error) {
-            console.error('Error fetching assignees:', error);
-        }
-    }
-
-    // Mettre à jour les membres lors du changement de l'équipe
-    teamSelect.addEventListener('change', (event) => {
-        const teamId = event.target.value;
-        if (teamId) {
-            updateAssignees(teamId);
-        } else {
-            assigneeSelect.disabled = true;
-            assigneeSelect.innerHTML = '<option value="">Self Assignee</option>';
-        }
-    });
-
-    // Activer/désactiver le champ "Parent Task" en fonction de la sélection du type de tâche
-    typeSelect.addEventListener('change', (event) => {
-        const isMainTask = event.target.value == '1';
-        parentTaskSelect.disabled = isMainTask;
-    });
-
-
-
-  // Activer/désactiver le champ "Parent Task" en fonction de la sélection du type de tâche
-  typeSelect.addEventListener('change', (event) => {
-        const isMainTask = event.target.value == '1';
-        parentTaskSelect.disabled = isMainTask;
-    });
-
-    // Fonction pour mettre à jour le projet basé sur la tâche parente
-    function updateProjectBasedOnParent() {
-        const parentTaskId = parentTaskSelect.value;
-        
-        if (parentTaskId) {
-            // On peut envoyer une requête AJAX pour obtenir le projet de la tâche parente
-            fetch(`/tasks/${parentTaskId}/project`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.projectId) {
-                        projectSelect.value = data.projectId;
-                        projectSelect.disabled = true;
-                        hiddenProjectInput.value = data.projectId;
-                    }
-                });
-        } else {
-            projectSelect.disabled = false;
-            hiddenProjectInput.value = '';
-        }
-    }
-
-    // Événement de changement de sélection de la tâche parente
-    parentTaskSelect.addEventListener('change', updateProjectBasedOnParent);
-
-    // Initialiser le formulaire
-    function initializeForm() {
-        const isMainTask = typeSelect.value == '1';
-        parentTaskSelect.disabled = isMainTask;
-        updateProjectBasedOnParent();
-    }
-
-    // Appeler l'initialisation du formulaire lors du chargement de la page
-    initializeForm();
 });
 
 </script>

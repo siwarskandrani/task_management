@@ -51,6 +51,7 @@
                     @yield('ByUser_content')
                     @yield('show_tasks')
                     @yield('show_teams')
+                    @yield('content_invitations')
 
                 </div>
             </div>

@@ -24,17 +24,17 @@
 
     <div class="row">
         @foreach ($projects as $project)
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
+        <div class="col-md-6 col-lg-4 mb-4 d-flex align-items-stretch">
+            <div class="card shadow-sm h-100 w-100">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ $project->name }}</h5>
-                    <p class="card-text">{{ Str::limit($project->description, 100, '...') }}</p>
+                    <p class="card-text flex-grow-1">{{ Str::limit($project->description, 100, '...') }}</p>
                     <h6 class="card-subtitle mb-2 text-muted">Tasks:</h6>
                     @forelse ($project->tasks as $task)
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
                                 <span>{{ $task->title }}</span>
-                                <small class="text-muted d-block">Assigned to: {{ $task->owner ? $task->owner->name : 'Unassigned' }}</small>
+                                <small class="text-muted d-block">Owned by: {{ $task->assignee->name}}</small>
                             </div>
                             <a class="text-info" href="{{ route('tasks.show', $task->id) }}">
                                 <i class="bi bi-eye"></i>

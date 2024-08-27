@@ -32,12 +32,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#service">Service</a>
                     </li>                   
-                    <li class="nav-item">
-                        <a class="nav-link" href="#portfolio">Portfolio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contact">Contact</a>
-                    </li>
+                   
                     <li class="nav-item-auth " style="margin-left:3cm">
                         @if (Route::has('login'))
                             @auth
@@ -69,12 +64,7 @@
             <div class="img-holder">
                 <img src="assets/imgs/man.svg" alt="">
             </div>      
-        </div>  
-
-        
-        {{-- <h6 class="subtitle">Welcome to</h6>
-        <h6 class="title">Task Management System</h6>
-        <p>Organize your tasks and manage your team effectively</p> --}}
+        </div>         
     </header>
     <!-- End of Page Header -->
     
@@ -83,64 +73,65 @@
         <div class="container mt-5">
             <div class="row text-center text-md-left">
                 <div class="col-md-3">
-                    <img src="assets/imgs/avatar.jpg" alt="" class="img-thumbnail mb-4">
+                    <img src="assets/imgs/image.png" alt="" class="img-thumbnail mb-4">
                 </div>
                 <div class="pl-md-4 col-md-9">
-                    <h6 class="title">James Smith</h6>
-                    <p class="subtitle">UI/UX Designer</p>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Provident, pariatur, aperiam aut autem voluptas odit. Odio ducimus delectus totam sed aliquam sequi praesentium mollitia, illum repudiandae quidem quod, magni magnam.</p>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Enim, eius, nam. Quo praesentium qui temporibus voluptatum, facilis aliquid eligendi fugiat beatae neque inventore non. Laborum repellendus consequatur ullam voluptatum asperiores.</p>
-                    <button class="btn btn-primary rounded mt-3">DOWNLOAD CV</button>                   
+                    <h6 class="title">About</h6>
+                    <p class="subtitle">Our Application</p>
+                    <p>Our app is the perfect solution for managing tasks within teams. It allows you to create and track projects, assign specific tasks to team members, and clearly visualize the progress of each project. Enhance team management and boost productivity with a tool designed for effective collaboration.</p>
+                    <a href="{{ route('login') }}" class="btn btn-primary rounded mt-3">Get Started</a>
                 </div>
+                
             </div>
         </div>
     </section>
 
-    <!-- Service section -->
-    <section id="service" class="section">
-        <div class="container text-center">
-            <h6 class="subtitle">Service</h6>
-            <h6 class="section-title mb-4">What I Do</h6>
-            <p class="mb-5 pb-4">Lorem ipsum dolor sit amet, consectetur adipisicing elit. In alias dignissimos. <br> rerum commodi corrupti, temporibus non quam.</p>
+   <!-- Service section -->
+<section id="service" class="section">
+    <div class="container text-center">
+        <h6 class="subtitle">Our Services</h6>
+        <h6 class="section-title mb-4">What We Offer</h6>
+        <p class="mb-5 pb-4">Discover how our application empowers your team with seamless management and powerful insights.</p>
 
-            <div class="row">
-                <div class="col-sm-6 col-md-3 mb-4">
-                    <div class="custom-card card border">
-                        <div class="card-body">
-                            <i class="icon ti-crown"></i>
-                            <h5>UI/UX Design</h5>
-                        </div>
+        <div class="row">
+            <div class="col-sm-6 col-md-3 mb-4">
+                <div class="custom-card card border">
+                    <div class="card-body">
+                        <i class="icon ti-crown"></i>
+                        <h5>Team Management</h5>
                     </div>
                 </div>
-                <div class="col-sm-6 col-md-3 mb-4">
-                    <div class="custom-card card border">
-                        <div class="card-body">
-                            <i class="icon ti-desktop"></i>
-                            <h5>Web Design</h5>
-                        </div>
+            </div>
+            <div class="col-sm-6 col-md-3 mb-4">
+                <div class="custom-card card border">
+                    <div class="card-body">
+                        <i class="icon ti-desktop"></i>
+                        <h5>Task Management</h5>
                     </div>
                 </div>
-                <div class="col-sm-6 col-md-3 mb-4">
-                    <div class="custom-card card border">
-                        <div class="card-body">
-                            <i class="icon ti-mobile"></i>
-                            <h5>App Design</h5>
-                        </div>
+            </div>
+            <div class="col-sm-6 col-md-3 mb-4">
+                <div class="custom-card card border">
+                    <div class="card-body">
+                        <i class="icon ti-mobile"></i>
+                        <h5>Project Oversight</h5>
                     </div>
                 </div>
-                <div class="col-sm-6 col-md-3 mb-4">
-                    <div class="custom-card card border">
-                        <div class="card-body">
-                            <i class="icon ti-bar-chart"></i>
-                            <h5>SEO</h5>
-                        </div>
+            </div>
+            <div class="col-sm-6 col-md-3 mb-4">
+                <div class="custom-card card border">
+                    <div class="card-body">
+                        <i class="icon ti-bar-chart"></i>
+                        <h5>Team Visualization</h5>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- End of Sectoin -->
+    </div>
+</section>
+<!-- End of Section -->
 
+{{-- 
     <!-- Skills section -->
     <section class="section">
         <div class="container text-center">
@@ -313,23 +304,16 @@
             <iframe src="https://snazzymaps.com/embed/61257"></iframe>
         </div>      
     </section>
-    <!-- End of Contact Section -->
+    <!-- End of Contact Section --> --}}
 
     <!-- Page Footer -->
     <footer class="page-footer">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-sm-6">
-                    <p>Copyright <script>document.write(new Date().getFullYear())</script> &copy; <a href="http://www.devcrud.com" target="_blank">DevCRUD</a></p>
+                    <p>Copyright <script>document.write(new Date().getFullYear())</script> &copy; <a href="" target="_blank">Siwar</a></p>
                 </div>
-                <div class="col-sm-6">
-                    <div class="socials">
-                        <a class="social-item" href="javascript:void(0)"><i class="ti-facebook"></i></a>
-                        <a class="social-item" href="javascript:void(0)"><i class="ti-google"></i></a>
-                        <a class="social-item" href="javascript:void(0)"><i class="ti-github"></i></a>
-                        <a class="social-item" href="javascript:void(0)"><i class="ti-twitter"></i></a>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </footer> 

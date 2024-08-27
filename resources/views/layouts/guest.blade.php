@@ -16,21 +16,27 @@
 
         <!-- Custom Styles -->
         <style>
-            .custom-bg {
+            /* .custom-bg {
                 background-color: #faf9b9; 
                 
+            } */
+            .border-custom {
+                border: 2px solid #ff7a57; /* Bordure de 2px avec couleur personnalisée */
             }
+        </style>
         </style>
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 custom-bg">
-            <div>
+            <div >
                 <a href="/">
-                    {{-- <x-application-logo class="w-20 h-20 fill-current text-gray-500" /> --}}
+                  {{-- <x-application-logo class="w-20 h-20 fill-current text-gray-500" /> --}}
+                  <img src="{{ asset('assets/imgs/logo.svg') }}" alt="Logo" class="w-20 h-27 fill-current ">
+
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg border-custom">
                 {{ $slot }}
             </div>
         </div>
