@@ -182,6 +182,7 @@ class TaskController extends Controller
     {
         $userId = auth()->id();
         
+        
         // Récupérer les projets appartenant à l'utilisateur connecté
         $projects = Project::where('owner', $userId)->get(); 
         
@@ -442,22 +443,32 @@ public function calendar()
 
  
 
-public function showWorkloadByTeam()
+public function showWorkloadByTeam(Request $request)
 {
     // Récupérer l'utilisateur connecté
     $user = auth()->user();
     
     // Récupérer les équipes auxquelles l'utilisateur appartient
     $teams = $user->teams()->with(['users.tasks'])->get();
-    
+
+     // Récupérer le terme de recherche
+     $search = $request->input('search', '');
+
     // Filtrer les tâches pour chaque utilisateur afin de ne montrer que celles de l'équipe
     foreach ($teams as $team) {
         foreach ($team->users as $user) {
-            $user->tasks = $user->tasks()->where('team_id', $team->id)->get();
+            $user->tasks = $user->tasks()->where('team_id', $team->id)
+            ->get();
         }
     }
 
-    return view('workload.index', compact('teams'));
+   // Récupérer les équipes auxquelles l'utilisateur appartient et filtrer par titre
+   $teams = $user->teams()
+   ->where('name', 'like', '%' . $search . '%')
+   ->with(['users.tasks'])
+   ->get();
+
+    return view('workload.index', compact('teams','search'));
 }
 
 
@@ -466,19 +477,17 @@ public function showWorkloadByTeam()
 public function showTasksByUser($id, $team_id)
 {
     $user = User::findOrFail($id);
-    $tasks = $user->tasks()->where('team_id', $team_id)->get();
+    $tasks = $user->tasks()
+    ->where('team_id', $team_id)
+    ->whereNull('parent_task')
+    ->where('type', 1)
+    ->get();
+
     
     return view('tasks.by_user', compact('user', 'tasks'));
 }
 
-public function getParentProject(Task $task)
-{
-    $projectId = $task->project_id; // Assurez-vous que le champ `project_id` est bien présent dans la tâche parente
-    return response()->json(['projectId' => $projectId]);
 }
-
-
-    }
     
     
 

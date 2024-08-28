@@ -37,7 +37,48 @@
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
+    <!-- Type -->
+    <div class="form-group mb-3">
+        <label for="type">Type</label>
+        <select name="type" id="type" class="form-select"  required>
+            <option value="1" {{ old('type', $task->type) == 1 ? 'selected' : '' }}>Main task</option>
+            <option value="2" {{ old('type', $task->type) == 2 ? 'selected' : '' }}>Sub task</option>
+        </select>
+        @error('type')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
+    </div>
 
+    <!-- Parent Task -->
+    <div class="form-group mb-3">
+        <label for="parent_task">Parent Task</label>
+        <select name="parent_task" id="parent_task" class="form-select">
+            <option value="">None</option>
+            @foreach($parent_tasks as $parentTask)
+                <option value="{{ $parentTask->id }}" {{ old('parent_task', $task->parent_task_id) == $parentTask->id ? 'selected' : '' }}>
+                    {{ $parentTask->title }}
+                </option>
+            @endforeach
+        </select>
+        @error('parent_task')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
+    </div>
+      <!-- Projet -->
+      <div class="form-group mb-3">
+        <label for="project_id">Project</label>
+        <select name="project_id" id="project_id" class="form-select"  >
+            <option value="">None</option>
+            @foreach($projects as $project)
+                <option value="{{ $project->id }}" {{ old('project_id', $task->project_id) == $project->id ? 'selected' : '' }}>
+                    {{ $project->name }}
+                </option>
+            @endforeach
+        </select>
+        @error('project_id')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
+    </div>
         <!-- Team -->
         <div class="form-group mb-3">
             <label for="team_id">Team</label>
@@ -75,21 +116,7 @@
         </div>
 
 
-        <!-- Projet -->
-        <div class="form-group mb-3">
-            <label for="project_id">Project</label>
-            <select name="project_id" id="project_id" class="form-select"  >
-                <option value="">None</option>
-                @foreach($projects as $project)
-                    <option value="{{ $project->id }}" {{ old('project_id', $task->project_id) == $project->id ? 'selected' : '' }}>
-                        {{ $project->name }}
-                    </option>
-                @endforeach
-            </select>
-            @error('project_id')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
+      
    <!-- Médias -->
                 <!-- existing Médias -->
 
@@ -146,33 +173,7 @@
         
 
 
-        <!-- Type -->
-        <div class="form-group mb-3">
-            <label for="type">Type</label>
-            <select name="type" id="type" class="form-select"  required>
-                <option value="1" {{ old('type', $task->type) == 1 ? 'selected' : '' }}>Main task</option>
-                <option value="2" {{ old('type', $task->type) == 2 ? 'selected' : '' }}>Sub task</option>
-            </select>
-            @error('type')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
-
-        <!-- Parent Task -->
-        <div class="form-group mb-3">
-            <label for="parent_task">Parent Task</label>
-            <select name="parent_task" id="parent_task" class="form-select">
-                <option value="">None</option>
-                @foreach($parent_tasks as $parentTask)
-                    <option value="{{ $parentTask->id }}" {{ old('parent_task', $task->parent_task_id) == $parentTask->id ? 'selected' : '' }}>
-                        {{ $parentTask->title }}
-                    </option>
-                @endforeach
-            </select>
-            @error('parent_task')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
+    
 
         <!-- Dates -->
         <div class="form-group mb-3">

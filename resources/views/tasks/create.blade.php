@@ -39,33 +39,7 @@
             @enderror
         </div>
 
-        <!-- Team -->
-        <div class="form-group mb-4">
-            <label for="team_id" class="form-label">Team</label>
-            <select name="team_id" id="team_id" class="form-select">
-                <option value="">None</option>
-                @foreach($teams as $team)
-                    <option value="{{ $team->id }}"
-                        {{ old('team_id') == $team->id ? 'selected' : '' }}
-                        >{{ $team->name }}</option>
-                @endforeach
-            </select>
-            @error('team_id')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
-
-        <!-- Assignee -->
-        <div class="form-group mb-4">
-            <label for="owner_id" class="form-label">Assignee</label>
-            <select name="owner_id" id="assignee_id" class="form-select" disabled>
-                <option value="{{ auth()->id() }}">Self Assignee</option>
-            </select>
-            @error('owner_id')
-                <div class="text-danger">{{ $message }}</div>
-            @enderror
-        </div>
-
+    
           <!-- Type -->
           <div class="form-group mb-4">
             <label for="type" class="form-label">Type</label>
@@ -84,9 +58,10 @@
         <select name="parent_task" id="parent_task" class="form-select" {{ old('type') == '1' ? 'disabled' : '' }}>
             <option value="">None</option>
             @foreach($parent_tasks as $task)
-                <option value="{{ $task->id }}" data-project="{{ $task->project_id }}" {{ old('parent_task') == $task->id ? 'selected' : '' }}>
-                    {{ $task->title }}
-                </option>
+            <option value="{{ $task->id }}" data-project="{{ $task->project_id }}" data-team="{{ $task->team_id }}" data-assignee="{{ $task->owner}}" {{ old('parent_task') == $task->id ? 'selected' : '' }}>
+                {{ $task->title }}
+            </option>
+            
             @endforeach
         </select>
         @error('parent_task')
@@ -111,6 +86,33 @@
         @enderror
     </div>
 
+   <!-- Team -->
+<div class="form-group mb-4">
+    <label for="team_id" class="form-label">Team</label>
+    <select name="team_id" id="team_id" class="form-select">
+        <option value="">None</option>
+        @foreach($teams as $team)
+            <option value="{{ $team->id }}" 
+                {{ old('team_id') == $team->id ? 'selected' : '' }}>
+                {{ $team->name }}
+            </option>
+        @endforeach
+    </select>
+    @error('team_id')
+        <div class="text-danger">{{ $message }}</div>
+    @enderror
+</div>
+
+    <!-- Assignee -->
+    <div class="form-group mb-4">
+        <label for="owner_id" class="form-label">Assignee</label>
+        <select name="owner_id" id="assignee_id" class="form-select" disabled>
+            <option value="{{ auth()->id() }}">Self Assignee</option>
+        </select>
+        @error('owner_id')
+            <div class="text-danger">{{ $message }}</div>
+        @enderror
+    </div>
 
 
         <!-- Status -->
@@ -192,6 +194,63 @@ document.addEventListener('DOMContentLoaded', function() {
         displayMediaNames(files);
     });
 
+    // Activer/désactiver le champ "Parent Task" en fonction de la sélection du type de tâche
+    function toggleParentTaskField() {
+        const isMainTask = typeSelect.value == '1';
+        parentTaskSelect.disabled = isMainTask;
+    }
+
+    typeSelect.addEventListener('change', () => {
+        toggleParentTaskField();
+    });
+
+    // Quand une tâche parente est sélectionnée
+    parentTaskSelect.addEventListener('change', function() {
+        const selectedOption = parentTaskSelect.options[parentTaskSelect.selectedIndex];
+        const projectId = selectedOption.getAttribute('data-project');
+        const teamId = selectedOption.getAttribute('data-team');
+        const assigneeId = selectedOption.getAttribute('data-assignee'); // Utilisation de data-assignee
+
+        if (projectId) {
+            projectSelect.value = projectId;
+            projectSelect.disabled = true;
+            addHiddenInput(projectSelect, projectId);
+        }
+
+        if (teamId) {
+            teamSelect.value = teamId;
+            teamSelect.disabled = true;
+            addHiddenInput(teamSelect, teamId);
+            updateAssignees(teamId);
+        } else {
+            teamSelect.value = '';
+            teamSelect.disabled = true;
+            assigneeSelect.innerHTML = '<option value="">Select an assignee</option>';
+            assigneeSelect.disabled = true;
+        }
+
+        // if (assigneeId) {
+        //     assigneeSelect.value = assigneeId;
+        //     assigneeSelect.disabled = true;
+        //     addHiddenInput(assigneeSelect, assigneeId);
+        // }
+    });
+
+    // Fonction pour ajouter un champ caché au formulaire
+    function addHiddenInput(selectElement, value) {
+        // Supprimer tout champ caché existant avec le même nom
+        let existingHiddenInput = document.querySelector(`input[name="${selectElement.name}"]`);
+        if (existingHiddenInput) {
+            existingHiddenInput.value = value;
+        } else {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = selectElement.name;
+            hiddenInput.value = value;
+            selectElement.form.appendChild(hiddenInput);
+        }
+    }
+
     // Fonction pour mettre à jour les membres de l'équipe assignés
     async function updateAssignees(teamId) {
         assigneeSelect.disabled = true;
@@ -210,7 +269,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 assigneeSelect.disabled = false;
             } else {
-                // Si aucun membre n'est disponible, vous pouvez afficher un message ou gérer cette situation
                 assigneeSelect.innerHTML = '<option value="">No members available</option>';
             }
         } catch (error) {
@@ -228,29 +286,6 @@ document.addEventListener('DOMContentLoaded', function() {
             assigneeSelect.innerHTML = '<option value="">Select an assignee</option>';
         }
     });
-
-    // Activer/désactiver le champ "Parent Task" en fonction de la sélection du type de tâche
-    function toggleParentTaskField() {
-        const isMainTask = typeSelect.value == '1';
-        parentTaskSelect.disabled = isMainTask;
-    }
-
-    typeSelect.addEventListener('change', () => {
-        toggleParentTaskField();
-    });
-
-    // Quand une tâche parente est sélectionnée
-    parentTaskSelect.addEventListener('change', function() {
-        const selectedOption = parentTaskSelect.options[parentTaskSelect.selectedIndex];
-        const projectId = selectedOption.getAttribute('data-project');
-
-        if (projectId) {
-            projectSelect.value = projectId; // Mettre à jour le projet automatiquement
-        }
-    });
-
-    // Vérifier et ajuster l'état du champ "Parent Task" au chargement initial de la page
-    toggleParentTaskField();
 
     // Initialisation de Selectize pour les tags
     tagsSelect.selectize({
@@ -292,7 +327,11 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => console.error('Error creating tag:', error));
         }
     });
+
+    // Vérifier et ajuster l'état du champ "Parent Task" au chargement initial de la page
+    toggleParentTaskField();
 });
+
 
 </script>
 @endsection

@@ -45,6 +45,8 @@
                                 <button type="submit" class="btn btn-danger btn-sm me-2">Delete</button>
                             </form>
                             <a class="btn btn-primary btn-sm" href="{{ route('tasks.edit', $task->id) }}">Edit</a>
+                            <a class="btn btn-info btn-sm" href="{{ route('tasks.show', $task->id) }}">Show</a>
+
                         </td>
                     </tr>
                 @empty

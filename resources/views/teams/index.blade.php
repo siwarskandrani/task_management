@@ -45,7 +45,7 @@
     </div>
     @endif
 
-    <table class="table table-striped table-bordered table-hover">
+    <table class="table table-bordered table-hover">
         <thead class="thead-dark">
             <tr>
                 <th>Team Name</th>
@@ -124,10 +124,10 @@
     }
 
     .circle:nth-child(1) { left: 0px; }
-    .circle:nth-child(2) { left: 45px; }
-    .circle:nth-child(3) { left: 90px; }
-    .circle:nth-child(4) { left: 135px; }
-    .circle:nth-child(5) { left: 180px; }
+    .circle:nth-child(2) { left: 30px; }
+    .circle:nth-child(3) { left: 60px; }
+    .circle:nth-child(4) { left: 90px; }
+    .circle:nth-child(5) { left: 120px; }
 </style>
 
 <script>
