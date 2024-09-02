@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Invitation extends Model
 {
-    use HasFactory;
+    protected $fillable = ['email', 'team_id', 'user_id', 'token'];
 
-    protected $fillable = ['email', 'team_id', 'token'];
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function team()
     {

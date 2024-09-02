@@ -23,8 +23,14 @@
                     <p><strong>Team:</strong> {{ $task->team->name ?? 'N/A' }}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>Project:</strong> {{ $task->project->name ?? 'N/A' }}</p>
+                    <p><strong>Project:</strong> 
+                        {{ $task->project->name ?? 'N/A' }} 
+                        @if(!empty($task->project->description))
+                            ({{ $task->project->description }})
+                        @endif
+                    </p>
                 </div>
+                
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">

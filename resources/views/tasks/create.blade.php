@@ -221,19 +221,14 @@ document.addEventListener('DOMContentLoaded', function() {
             teamSelect.value = teamId;
             teamSelect.disabled = true;
             addHiddenInput(teamSelect, teamId);
-            updateAssignees(teamId);
-        } else {
-            teamSelect.value = '';
-            teamSelect.disabled = true;
-            assigneeSelect.innerHTML = '<option value="">Select an assignee</option>';
-            assigneeSelect.disabled = true;
-        }
+           // updateAssignees(teamId);
+        } 
 
-        // if (assigneeId) {
-        //     assigneeSelect.value = assigneeId;
-        //     assigneeSelect.disabled = true;
-        //     addHiddenInput(assigneeSelect, assigneeId);
-        // }
+         if (assigneeId) {
+             assigneeSelect.value = assigneeId;
+            assigneeSelect.disabled = true;
+            addHiddenInput(assigneeSelect, assigneeId);
+        }
     });
 
     // Fonction pour ajouter un champ caché au formulaire
@@ -254,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fonction pour mettre à jour les membres de l'équipe assignés
     async function updateAssignees(teamId) {
         assigneeSelect.disabled = true;
-        assigneeSelect.innerHTML = ''; // Effacer les options précédentes
+        assigneeSelect.innerHTML = ''; 
 
         try {
             const response = await fetch(`/teams/${teamId}/members`);

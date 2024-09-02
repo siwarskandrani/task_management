@@ -4,11 +4,12 @@
 	<meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>welcome</title>
+    <title>TaskConnect</title>
     <!-- font icons -->
     <link rel="stylesheet" href="assets/vendors/themify-icons/css/themify-icons.css">
     <!-- Bootstrap + Steller main styles -->
 	<link rel="stylesheet" href="assets/css/steller.css">
+    <link rel="icon" href="{{ asset('assets/imgs/favicon.svg') }}" type="image/svg+xml">
 
 </head>
 <body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
@@ -57,8 +58,8 @@
     <header class="header" id="home">
         <div class="container">
             <div class="infos">
-                <h6 class="title">Welcome to</h6>
-                <h1>Task Management System</h1></br>
+                <h1 >Welcome to</h6>
+                <h1 class=" title ">TaskConnect</h1></br>
                 <p>Organize your tasks and manage your team effectively</p>
             </div>              
             <div class="img-holder">
